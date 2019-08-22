@@ -5,12 +5,14 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "heroku-postbuild": "echo Skip builds on Heroku",
     "lint": "vue-cli-service lint",
     "start": "node server.js"
   },
   "dependencies": {
     "axios": "^0.19.0",
     "core-js": "^2.6.5",
+    "express": "^4.17.1",
     "socket.io": "^2.2.0",
     "vue": "^2.6.10",
     "vue-router": "^3.0.3"
