@@ -7,7 +7,7 @@ const app = require('./app');
 /**
  * Get port from environment and store in Express.
  */
-const port = normalizePort(process.env.PORT || '3000');
+const port = process.env.PORT || '3000';
 app.set('port', port);
 // const debug = require('debug')('fritter-starter:server');
 const http = require('http').createServer(app);
