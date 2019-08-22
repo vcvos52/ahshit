@@ -14,7 +14,7 @@
         </div>
 
         <div v-if="gameStarted===true">
-            <Game v-bind:all="all"/>
+            <Game v-bind:all="all" v-bind:refresh="refresh" v-bind:username="username"/>
         </div>
     </div>
 </template>
@@ -26,6 +26,7 @@
 import axios from "axios";
 import {socket} from "../main";
 import Game from "./Game"
+import { eventBus } from "../main";
 
 
 export default {
@@ -39,6 +40,7 @@ export default {
         all: [],
         gameStarted: false,
         gameEnded: false,
+        refresh: false,
     }
   },
 
@@ -51,48 +53,72 @@ export default {
 
       axios.get('/api/online/all').then(res => {
           this.all = res.data;
-      })
+      });
+
+      axios.get('/isgamestarted').then(data => {
+          if (data.data === 'gamestarted'){
+            this.refresh = true;
+            this.gameStarted = true;
+        }
+      }).catch(err => console.log(err));
 
   },
 
   mounted(){
 
-    socket.on('player-joined', d => {
-        //   this.all.push(data);
-        axios.get('/api/online/all').then(res => {
-            this.all = res.data;
-            });
-      });
-
-    socket.on('player-left', d => {
-        //   this.all.push(data);
-        if (this.gameStarted === false){
-            axios.get('/api/online/all').then(res => {
-                this.all = res.data;
-                });
-        } else {
-            axios.put('/api/online/addplayers', this.all).catch(err => {console.log(err)});
-            this.gameEnded = true;
-            this.gameStarted = false;
+    socket.on('player-joined', user => {
+        console.log("PlayGame 70 -- ", this.username, this.all);
+        if (!this.gameStarted){
             axios.get('/api/online/all').then(res => {
                 this.all = res.data;
                 });
         }
       });
 
+    socket.on('player-left', user => {
+        //   this.all.push(data);
+        if (this.gameStarted === false){
+            axios.get('/api/online/all').then(res => {
+                this.all = res.data;
+                });
+        } else {
+            let included = this.checkInAll(user);
+            console.log("PlayGame 83 -- ", this.username, this.all);
+            if (included){
+                eventBus.$emit('clear');
+            }
+        }
+      });
+
     socket.on('start-game', d => {
-        this.gameStarted = true;
+        if (!this.gameStarted){
+            this.gameStarted = true;
+            axios.post("/setGameStarted")
+                .then(console.log("good")).catch(console.log("error on axios call in scoreCard method"));
+        }
+
     });
 
   },
 
   methods: {
 
+      checkInAll: function(user){
+          for (let i = 0; i < this.all.length; i++){
+              let person = this.all[i];
+              if (person['name'] === user){
+                  return true;
+              }
+          }
+          return false;
+      },
+
       startGame: function(){
           axios.put('/api/online/removeplayers', this.all)
             .catch(err => {
                 console.log(err);
-            })
+            });
+          this.first = true;
           socket.emit('start-game', this.username)
       }
 

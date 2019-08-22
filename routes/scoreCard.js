@@ -1,24 +1,37 @@
 const express = require('express');
 const router = express.Router();
+const ScoreData = require('../models/ScoreData');
 
 router.post('/saveTable', (req, res)=> {
-    req.session.tableData = req.body
+    req.session.tableData = req.body;
+    ScoreData.setData(req.body);
     // console.log(req.session.tableData);
     res.status(200).end()
   });
 
   router.post('/saveRoundResults', (req, res)=> {
-    req.session.roundResults = req.body
+    req.session.roundResults = req.body;
+    ScoreData.setRoundResults(req.body);
     // console.log(req.session.roundResults);
     res.status(200).end()
   });
 
+  router.post('/addRoundResults', (req, res)=> {
+      let round = req.body[0];
+      let name = req.body[1];
+      let tricksWon = req.body[2];
+      let wager = req.body[3];
+      ScoreData.addRoundResults(round, name, tricksWon, wager);
+      // console.log(req.session.roundResults);
+      res.status(200).end()
+  });
+
 router.get('/getTable', (req, res) => {
-    res.status(200).end(req.session.tableData)
+    res.status(200).send(ScoreData.getData()).end();
 });
 
 router.get('/getRoundResults', (req, res) => {
-    res.status(200).end(req.session.roundResults)
+    res.status(200).send(ScoreData.getRoundResults()).end()
 });
 
 router.get('/status', (req, res) => {

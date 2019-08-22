@@ -1,4 +1,5 @@
-
+data = null;
+RoundResults = null;
 
 class ScoreData{
 
@@ -43,14 +44,45 @@ class ScoreData{
      * safely returns all of the data
      */
     static getData(){
-        return this.data;
+        return data;
     }
+
+    /**
+     * safely returns all of the data
+     */
+    static getRoundResults(){
+        return RoundResults;
+    }
+
+
+    static setData(tableData){
+        data = tableData;
+    }
+
+
+    static setRoundResults(tableData){
+        RoundResults = tableData;
+    }
+
+    static addRoundResults(round, name, tricksWon, wager){
+        if (parseInt(wager, 10) === tricksWon){
+            RoundResults[round][name+'bet'] = 1;
+        } else {
+            RoundResults[round][name+'bet'] = -1;
+        }
+    }
+
 
     /**
      * safely returns the player names list.
      */
     static getNames(){
         return this.playerNames;
+    }
+
+    static endGame(){
+        data = null;
+        RoundResults = null;
     }
 
 }

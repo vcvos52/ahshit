@@ -33,6 +33,7 @@ class CardDeck{
             }
         }
         this.cards = CardDeck.shuffle(c);
+        this.trump = this.cards.pop();
     }
 
     static dealCard(n){
@@ -43,10 +44,12 @@ class CardDeck{
         return hand;
     }
 
-    static getTrump(){
+    static setTrump(){
         deck.trump = deck.cards.pop();
-        return deck.trump
+    }
 
+    static getTrump(){
+        return deck.trump;
     }
 
     static shuffle(a) {
@@ -58,16 +61,11 @@ class CardDeck{
     }
 
     static setDeck(){
-        if (!deck){
-            deck = new CardDeck();
-        }
+        deck = new CardDeck();
         return deck
     }
 
-    static newRound(){
-        if (deck.cards.length < 52){
-            deck = new CardDeck();
-        }
+    static getDeck(){
         return deck;
     }
 

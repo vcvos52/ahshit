@@ -2,13 +2,24 @@ let allusers = [];
 
 class Users{
 
-    constructor(name){
+    constructor(name, hand){
         this.name = name;
-        this.active = false
+        this.active = false;
+        this.hand = hand;
     }
 
     static addUser(user){
         allusers.push(user);
+    }
+
+    static setHand(username, hand){
+        let user = allusers.filter(user => user.name === username)[0];
+        user.hand = hand;
+    }
+
+    static getHand(username){
+        let user = allusers.filter(user => user.name === username)[0];
+        return user.hand;
     }
 
     static getAllInactive(){
@@ -29,6 +40,17 @@ class Users{
     static deactivate(username){
         let user = allusers.filter(user => user.name === username)[0];
         user.active = false;
+    }
+
+    static endGame(){
+        allusers = [];
+    }
+
+    static emptyHands(){
+        for (let i = 0; i < allusers.length; i++){
+            let u = allusers[i];
+            u.hand = [];
+        }
     }
 }
 

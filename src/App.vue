@@ -13,7 +13,7 @@
       <div v-else-if="playgame===true">
         <div v-if="gogogo===false">
           <input type="text" v-model="username"><br><br>
-          <input style="width:30px" type="button" @click="entername" id="funny" v-bind:value="username">
+          <input style="width:70px" type="button" @click="entername" id="funny" v-bind:value="username">
         </div>
         <PlayGame v-bind:username="username" v-if="gogogo===true"/>
       </div>
@@ -29,7 +29,7 @@ import ScoreCard from "./components/ScoreCard.vue";
 import PlayGame from "./components/PlayGame.vue";
 import axios from "axios";
 import {socket} from "./main"
-
+import { eventBus } from "./main";
 
 
 export default {
@@ -51,6 +51,16 @@ export default {
 
 
   created: async function(){
+
+    axios.get('/connected').then(res => {
+      console.log(res.data);
+      if (res.data === 'no'){
+        console.log("CONNECTING");
+        socket.connect();
+        axios.post('/connect').then(console.log("connected")).catch("something wrong with connect api call");
+      }
+    })
+    
     /**
      * Checks if the user is currently signed in
      * This decided what HTML elements to render
@@ -65,12 +75,28 @@ export default {
           this.playgame = true;
           this.init = false;
           this.scorecard = false;
+        } else if (data.data === 'gogogo'){
+          this.playgame = true;
+          this.init = false;
+          this.scorecard = false;
+          this.gogogo = true;
         }
       })
       .catch(() => {
         this.init = true;
         this.scorecard = false;
         this.playgame = false;
+      });
+
+      eventBus.$on("clear", () => {
+        axios.delete(`/clearSession/${this.username}`)
+          .then(() => {
+            this.playgame = false;
+            this.scorecard = false;
+            this.init = true;
+            this.gogogo = false;
+            // socket.disconnect();
+          })
       });
 
   },
@@ -89,21 +115,13 @@ export default {
       this.init = false;
       this.scorecard = false;
       this.playgame = true;
-      socket.connect()
+      
       axios.post("/setPlayGame")
         .then(console.log("good")).catch(console.log("error on axios call in playGame method"))
     },
 
     clearSession: function(){
-      axios.delete(`/clearSession/${this.username}`)
-        .then(() => {
-          this.playgame = false;
-          this.scorecard = false;
-          this.init = true;
-          this.gogogo = false;
-          socket.emit('player-left', this.username);
-          socket.disconnect();
-        })
+      socket.emit('player-left', this.username);
     },
 
     entername: function(){

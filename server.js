@@ -14,10 +14,13 @@ const http = require('http').createServer(app);
 
 var io = require('socket.io')(http);
 
+let allconnections = [];
+
 // listen for incoming connections from client
 io.on('connection', function (socket) {
   console.log("Someone connected");
-
+  allconnections.push(socket.id);
+  console.log("==============================", allconnections);
   socket.on('disconnect', function(){
       console.log("Someone Disconnected");
   });
@@ -39,6 +42,49 @@ io.on('connection', function (socket) {
     // console.log(data);
     io.emit('start-game', data);
   });
+
+  // start listening for next turn
+  socket.on('next-turn', function (data) {
+    // console.log(data);
+    io.emit('next-turn', data);
+  });
+
+  // start listening for next turn
+  socket.on('next-round', function (data) {
+    // console.log(data);
+    io.emit('next-round', data);
+  });
+
+  // start listening for next turn
+  socket.on('card-played', function (data) {
+    // console.log(data);
+    io.emit('card-played', data);
+  });
+
+  // start listening for next turn
+  socket.on('trick-done', function (data) {
+    // console.log(data);
+    io.emit('trick-done', data);
+  });
+
+  // start listening for next turn
+  socket.on('deck-updated', function (data) {
+    // console.log(data);
+    io.emit('deck-updated', data);
+  });
+
+
+  socket.on('award-trick', function (data) {
+    // console.log(data);
+    io.emit('award-trick', data);
+  });
+
+  // start listening for next turn
+  socket.on('round-done', function (data) {
+    // console.log(data);
+    io.emit('round-done', data);
+  });
+
 
 });
 
