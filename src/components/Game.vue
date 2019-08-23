@@ -73,7 +73,6 @@
         <br><br>
         <!-- Round: {{round}} -->
         <br><br>
-        <!-- <button @click="nextRound()">Next Round</button> -->
 
         <div v-if="turn && bet">
           <label style="margin-bottom:10px">{{username}}'s bet: 
@@ -116,7 +115,7 @@
 // import { eventBus } from "./main";
 // import { async } from 'q';
 import axios from "axios";
-import {socket} from "../main";
+import {socket, eventBus} from "../main";
 import { setTimeout } from 'timers';
 import { copyFile } from 'fs';
 
@@ -170,11 +169,13 @@ export default {
       all: [],
       refresh: Boolean,
       username: String,
-      initializer: Boolean
+      initializer: Boolean,
     },
 
 
   created: async function(){
+
+    eventBus.$emit('game-started');
 
     if (this.refresh){
 
@@ -274,7 +275,7 @@ export default {
 
 // =======================================================
 
-    socket.on('next-turn', data => {
+    eventBus.$on('next-turn', data => {
         console.log(this.username, data, this.all);
         if (!this.checkInAll(data[1])){
           return;
@@ -324,7 +325,7 @@ export default {
 
 // =======================================================
 
-    socket.on('card-played', data => {
+    eventBus.$on('card-played', data => {
       if (!this.checkInAll(data[2])){
         return;
       }
@@ -335,7 +336,7 @@ export default {
     });
 // =======================================================
 
-    socket.on('next-round', user => {
+    eventBus.$on('next-round', user => {
       if (!this.checkInAll(user)){
         return;
       }
@@ -365,7 +366,6 @@ export default {
           sup.turn = false;
         }
         
-        // sup.nextRound();
       }, 1000)
 
 
@@ -373,7 +373,7 @@ export default {
     });
 // =======================================================
 
-    socket.on('trick-done', user => {
+    eventBus.$on('trick-done', user => {
       if (!this.checkInAll(user)){
         return;
       }
@@ -382,7 +382,7 @@ export default {
     });
 // =======================================================
 
-    socket.on('deck-updated', user =>{
+    eventBus.$on('deck-updated', user =>{
         console.log('**********************', this.username, this.all, user);
         if (!this.checkInAll(user)){
           console.log("USER NOT IN ALL!!!!!");
@@ -398,7 +398,7 @@ export default {
     });
 // =======================================================
 
-    socket.on('award-trick', data => {
+    eventBus.$on('award-trick', data => {
       if (!this.checkInAll(data[0])){
         return;
       }
@@ -410,7 +410,7 @@ export default {
     });
 // =======================================================
 
-    socket.on('round-done', user => {
+    eventBus.$on('round-done', user => {
       if (!this.checkInAll(user)){
         return;
       }
@@ -421,7 +421,6 @@ export default {
           this.tableData = res.data;
         }).catch(err => console.log(err));
 
-        // console.log('nextRound');
         this.roundDone = false;
         this.tricksWon = 0;
         this.round++;
@@ -466,7 +465,6 @@ export default {
 // =======================================================
 
     nextRound: function(){
-        // console.log('nextRound');
         // this.roundDone = false;
         // this.tricksWon = 0;
         // this.round++;
@@ -683,6 +681,30 @@ export default {
     }
 
 // =======================================================
+
+  },
+
+  beforeDestroy(){
+
+    eventBus.$off('next-turn');
+
+    eventBus.$off('card-played');
+
+    eventBus.$off('next-round');
+
+    eventBus.$off('trick-done');
+
+    eventBus.$off('deck-updated');
+
+    eventBus.$off('award-trick');
+
+    eventBus.$off('round-done');
+
+  },
+
+  destroyed(){
+
+    eventBus.$emit('game-ended');
 
   }
 

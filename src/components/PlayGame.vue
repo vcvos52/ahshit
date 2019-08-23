@@ -47,10 +47,13 @@ export default {
 
   props: {
       username: String,
+
     },
 
 
   created: async function(){
+
+      eventBus.$emit('lobby-started');
 
       axios.get('/api/online/all').then(res => {
           this.all = res.data;
@@ -67,7 +70,7 @@ export default {
 
   mounted(){
 
-    socket.on('player-joined', user => {
+    eventBus.$on('player-joined', user => {
         console.log("PlayGame 70 -- ", this.username, this.all);
         if (!this.gameStarted){
             axios.get('/api/online/all').then(res => {
@@ -76,7 +79,7 @@ export default {
         }
       });
 
-    socket.on('player-left', user => {
+    eventBus.$on('player-left', user => {
         //   this.all.push(data);
         if (this.gameStarted === false){
             axios.get('/api/online/all').then(res => {
@@ -91,7 +94,7 @@ export default {
         }
       });
 
-    socket.on('start-game', d => {
+    eventBus.$on('start-game', d => {
         if (!this.gameStarted){
             this.gameStarted = true;
             axios.post("/setGameStarted")
@@ -128,6 +131,22 @@ export default {
           this.first = true;
           
       }
+
+  },
+
+  beforeDestroy(){
+
+      eventBus.$off('player-joined');
+
+      eventBus.$off('player-left');
+
+      eventBus.$off('start-game');
+
+  },
+
+  destroyed(){
+
+    eventBus.$emit('lobby-ended');
 
   }
 

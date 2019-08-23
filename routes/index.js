@@ -93,16 +93,16 @@ router.delete('/clearSession/:username', (req, res) => {
   ScoreData.endGame();
   Users.emptyHands();
 
-  // req.session.playGame = false;
-  // req.session.scoreCard = false;
-  // req.session.presentForm = false;
-  // req.session.askNames = false;
-  // req.session.tableData = NaN;
-  // req.session.numberList = NaN;
-  // req.session.roundResults = NaN;
-  // req.session.logged = false;
-  // req.session.gamestarted = false;
-  // req.session.round = 0;
+  req.session.playGame = false;
+  req.session.scoreCard = false;
+  req.session.presentForm = false;
+  req.session.askNames = false;
+  req.session.tableData = null;
+  req.session.numberList = null;
+  req.session.roundResults = null;
+  req.session.logged = false;
+  req.session.gamestarted = false;
+  req.session.round = 0;
   console.log(req.session.username, req.params.username)
   if (req.session.username){
     Users.deleteUser(req.params.username);

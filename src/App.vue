@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    {{gameOpen}}
       <button style="margin:10px" @click="clearSession">Start Over</button>
       <div style="width:75%; margin:auto" v-if="init===true">
         <button id="button1" @click="scoreCard">Score Card</button>
@@ -42,15 +43,34 @@ export default {
   data() {
     return{
       init: false,
+      gameOpen: false,
       scorecard: false,
       playgame: false,
       gogogo: false,
+      lobbyOpen: false,
       username: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     }
   },
 
 
   created: async function(){
+
+
+    eventBus.$on('game-started', () => {
+      this.gameOpen = true;
+    });
+
+    eventBus.$on('game-ended', () => {
+      this.gameOpen = false;
+    });
+
+    eventBus.$on('lobby-started', () => {
+      this.lobbyOpen = true;
+    });
+
+    eventBus.$on('loby-ended', () => {
+      this.lobbyOpen = false;
+    });
 
     axios.get('/connected').then(res => {
       console.log(res.data);
@@ -98,6 +118,103 @@ export default {
             // socket.disconnect();
           })
       });
+
+  },
+
+  mounted(){
+
+// =======================================================
+
+    socket.on('player-joined', user => {
+      if (this.lobbyOpen){
+        eventBus.$emit('player-joined', user);
+      }
+
+    });
+
+// =======================================================
+
+    socket.on('player-left', user => {
+      if (this.lobbyOpen){
+        eventBus.$emit('player-left', user);
+      }
+
+    });
+
+// =======================================================
+
+    socket.on('start-game', d => {
+      if (this.lobbyOpen){
+        eventBus.$emit('start-game', d);
+      }
+
+    });
+
+// =======================================================
+
+    socket.on('next-turn', data => {
+      if (this.gameOpen){
+        eventBus.$emit('next-turn', data);
+
+      }
+
+    });
+
+// =======================================================
+
+    socket.on('card-played', data => {
+      if (this.gameOpen){
+        eventBus.$emit('card-played', data);
+
+      }
+
+    });
+// =======================================================
+
+    socket.on('next-round', user => {
+      if (this.gameOpen){
+        eventBus.$emit('next-round', user);
+
+      }
+
+    });
+// =======================================================
+
+    socket.on('trick-done', user => {
+      if (this.gameOpen){
+        eventBus.$emit('trick-done', user);
+
+      }
+
+    });
+// =======================================================
+
+    socket.on('deck-updated', user =>{
+      if (this.gameOpen){
+        eventBus.$emit('deck-updated', user);
+
+      }
+
+    });
+// =======================================================
+
+    socket.on('award-trick', data => {
+      if (this.gameOpen){
+        eventBus.$emit('award-trick', data);
+
+      }
+
+    });
+// =======================================================
+
+    socket.on('round-done', user => {
+      if (this.gameOpen){
+        eventBus.$emit('round-done', user);
+      }
+        
+
+    });
+// =======================================================
 
   },
 
