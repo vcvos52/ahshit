@@ -61,6 +61,11 @@ class CardDeck{
     }
 
     static setDeck(){
+        if (deck){
+            if (deck.cards.length > 50){
+                return deck;
+            }
+        }
         deck = new CardDeck();
         return deck
     }
