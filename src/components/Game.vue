@@ -77,6 +77,7 @@
         <div v-if="turn && bet">
           <label style="margin-bottom:10px">{{username}}'s bet: 
           <input style="border-radius:7px; text-align:center" type="number" v-model="tableData[round][username+'bet']" v-bind:id="username+'betinput'" v-bind:placeholder="'bet for '+username">
+          </label>
           <button v-on:click="submitBet()">Submit Bets</button>
         </div>
           
@@ -713,6 +714,10 @@ export default {
 
 
 <style>
+
+button{
+  -webkit-appearance: none;
+}
 
 #logo {
   font-family: 'Open Sans', sans-serif;
