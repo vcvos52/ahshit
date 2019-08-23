@@ -14,7 +14,7 @@
         </div>
 
         <div v-if="gameStarted===true">
-            <Game v-bind:all="all" v-bind:refresh="refresh" v-bind:username="username"/>
+            <Game v-bind:initializer="first" v-bind:all="all" v-bind:refresh="refresh" v-bind:username="username"/>
         </div>
     </div>
 </template>
@@ -41,6 +41,7 @@ export default {
         gameStarted: false,
         gameEnded: false,
         refresh: false,
+        first: false,
     }
   },
 
@@ -115,11 +116,17 @@ export default {
 
       startGame: function(){
           axios.put('/api/online/removeplayers', this.all)
+            .then(res => {
+                this.gameStarted = true;
+                axios.post("/setGameStarted")
+                    .then(console.log("good"))
+                    .catch(console.log("error on axios call in scoreCard method"));
+            })
             .catch(err => {
                 console.log(err);
             });
           this.first = true;
-          socket.emit('start-game', this.username)
+          
       }
 
   }

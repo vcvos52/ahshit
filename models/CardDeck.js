@@ -77,7 +77,6 @@ class CardDeck{
     static endGame(){
         deck = null;
     }
-
 }
 
 module.exports = CardDeck;

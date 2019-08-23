@@ -170,6 +170,7 @@ export default {
       all: [],
       refresh: Boolean,
       username: String,
+      initializer: Boolean
     },
 
 
@@ -213,12 +214,16 @@ export default {
         this.baseAll.push(this.all[i]);
       }
 
-      await axios.get('/api/online/setdeck')
-        .then(res => {
-          this.deck = res.data[0];
-          this.trump = res.data[1];
-          })
-        .catch(err => {console.log("problem setting deck")});
+      if (this.initializer){
+        await axios.get('/api/online/setdeck')
+          .then(res => {
+            this.deck = res.data[0];
+            this.trump = res.data[1];
+            socket.emit('start-game', this.username);
+            })
+          .catch(err => {console.log("problem setting deck")});
+      }
+
 
       await axios.post('/api/online/setall', this.all)
         .catch(err => {console.log("problem setting all")});
