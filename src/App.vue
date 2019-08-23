@@ -68,7 +68,7 @@ export default {
       this.lobbyOpen = true;
     });
 
-    eventBus.$on('loby-ended', () => {
+    eventBus.$on('lobby-ended', () => {
       this.lobbyOpen = false;
     });
 
@@ -238,6 +238,9 @@ export default {
     },
 
     clearSession: function(){
+      if (!this.gameOpen){
+        eventBus.$emit('clear');
+      }
       socket.emit('player-left', this.username);
     },
 
