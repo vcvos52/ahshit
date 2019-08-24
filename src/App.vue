@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     {{gameOpen}}
-      <button id="button1" style="margin:10px; margin-bottom:10%" @click="clearSession">Start Over</button>
+      <button id="button2" style="margin:10px; margin-bottom:10%" @click="clearSession">Start Over</button>
       <div style="width:75%; margin:auto" v-if="init===true">
         <button id="button1" @click="scoreCard">Score Card</button>
         <button id="button1" @click="playGame">Play Game</button>
@@ -282,7 +282,7 @@ export default {
 
 #button1::before {
 	background-color:#8e98a5;;
-	background-image:url(./assets/x.png);
+	background-image:url(./assets/right_arrow.png);
 	background-repeat:no-repeat;
 	background-position:center center;
 	content:"";
@@ -326,7 +326,8 @@ export default {
 }
 
 #button2::before {
-	background-color:#8e98a5;;
+	background-color:#8e98a5;
+  background-image:url(./assets/x.png);
 	background-repeat:no-repeat;
 	background-position:center center;
 	content:"";

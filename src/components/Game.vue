@@ -56,7 +56,10 @@
         <div v-else>
           {{currentTrick}}
           <button v-for="(card, i) in currentTrick"  v-bind:key="i">Suit: {{card.suit}} <br> <br> Rank: {{card.rank}}</button>
+
           <br><br>
+          <!-- <button v-for="(card, i) in hand" @click="playCard(i)" v-bind:key="i" v-bind:id="i" name="cards"><img src="../assets/card.jpg"></button> -->
+
           <button v-for="(card, i) in hand" @click="playCard(i)" v-bind:key="i" v-bind:id="i" name="cards">Suit: {{card.suit}} <br> <br> Rank: {{card.rank}}</button>
         </div>
 
