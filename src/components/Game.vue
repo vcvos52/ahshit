@@ -33,10 +33,26 @@
 
         <br><br>
 
-        {{all}}
-        {{username}}
+        <!-- {{all}} -->
+        <!-- {{username}} -->
+        
         <br><br>
-        Deck: {{deck}} <br><br> Trump: {{trump}} <br><br> Card Led: {{firstPlayedCard}}
+        
+        <div class="trump-container">
+         <label class="card-no-hover"><span>Trump</span> <br>
+         <!-- <div style="margin:auto; margin-top:10px; margin-right:5px; content-align:center" class="card-no-hover">  -->
+          <img :src="getImg(trump)">
+         <!-- </div> -->
+         </label>
+          
+         
+         <label class="card-no-hover"><span>Card Led:</span> 
+         <!-- <div style="margin:auto; margin-top:10px; margin-left:5px; content-align:center;" class="card-no-hover"> -->
+          <img style="border-radius:6%" :src="getImg(firstPlayedCard)">
+         <!-- </div> -->
+         </label>
+        </div>
+
         <br><br>
         {{deck.cards.length}}
         <br>
@@ -54,13 +70,17 @@
         </div>
 
         <div v-else>
-          {{currentTrick}}
-          <button v-for="(card, i) in currentTrick"  v-bind:key="i">Suit: {{card.suit}} <br> <br> Rank: {{card.rank}}</button>
+          <!-- {{currentTrick}} -->
+          <label><span>Current Trick:</span> <br> 
+          <button v-for="(card, i) in currentTrick"  class="card-no-hover" v-bind:key="i"><img :src="getImg(card)"></button>
+          </label>
 
           <br><br>
-          <!-- <button v-for="(card, i) in hand" @click="playCard(i)" v-bind:key="i" v-bind:id="i" name="cards"><img src="../assets/card.jpg"></button> -->
+          <label><span>Your Hand:</span><br>
+          <button v-for="(card, i) in hand" @click="playCard(i)" v-bind:key="i" v-bind:id="i" name="cards" class="card"><img :src="getImg(card)"></button>
+          </label>
 
-          <button v-for="(card, i) in hand" @click="playCard(i)" v-bind:key="i" v-bind:id="i" name="cards">Suit: {{card.suit}} <br> <br> Rank: {{card.rank}}</button>
+          <!-- <button v-for="(card, i) in hand" @click="playCard(i)" v-bind:key="i" v-bind:id="i" name="cards">Suit: {{card.suit}} <br> <br> Rank: {{card.rank}}</button> -->
         </div>
 
         <div style="color:red" v-if="wrongSuit">
@@ -286,6 +306,7 @@ export default {
         }
 
         let sup = this;
+        this.firstPlayedCard = null;
         if (this.currentTrick.length === this.all.length){
           console.log("272 in socket..", this.all, this.turnIndex, this.trickWinner);
           let w = this.all.filter(p => p.name === this.trickWinner)[0];
@@ -351,6 +372,7 @@ export default {
         let butt = crds[i];
         butt.disabled = true;
       }
+      this.firstPlayedCard = null;
       setTimeout(function(){
         sup.submitResults();
         sup.trickDone = true;
@@ -682,9 +704,16 @@ export default {
       this.trickDone = false;
       this.currentTrick = [];
       socket.emit('trick-done', this.username)
-    }
+    },
 
 // =======================================================
+
+    getImg: function(card){
+      if (!card){
+        return require('../assets/cards/empty.jpg');
+      }
+      return require('../assets/cards/'+card['rank']+card['suit']+'.png');
+    }
 
   },
 
@@ -718,9 +747,26 @@ export default {
 
 <style>
 
-button{
+.card{
   -webkit-appearance: none;
+  width: 6%;
+  padding: 0%;
+  border: 0%;
+  margin: 1%;
+  border-radius: 6%;
+  min-width: 60px;
 }
+
+.card-no-hover{
+  -webkit-appearance: none;
+  width: 6%;
+  padding: 0%;
+  border: 0%;
+  margin: 1%;
+  border-radius: 6%;
+  min-width: 60px;
+}
+
 
 #logo {
   font-family: 'Open Sans', sans-serif;
@@ -773,6 +819,24 @@ td input{
   opacity: 1;
   width: 50%;
   height: 30%;
+}
+
+img {
+    width:100%;
+    height:auto;
+}
+
+.card:hover{
+  opacity: 0.5;
+}
+
+.trump-container{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
 }
 
 </style>

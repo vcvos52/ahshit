@@ -1,7 +1,6 @@
 <template>
   <div id="app">
-    {{gameOpen}}
-      <button id="button2" style="margin:10px; margin-bottom:10%" @click="clearSession">Start Over</button>
+      <button id="button2" style=" margin-bottom:10%" @click="clearSession">Start Over</button>
       <div style="width:75%; margin:auto" v-if="init===true">
         <button id="button1" @click="scoreCard">Score Card</button>
         <button id="button1" @click="playGame">Play Game</button>
@@ -313,7 +312,7 @@ export default {
 	color:#fff;
 	position:relative;
 	padding:10px 20px;
-	padding-right:20px;
+	padding-right:50px;
 	background-image: linear-gradient(bottom, rgb(161, 158, 156) 0%, rgb(101,86,78) 100%);
 	border-radius: 5px;
 	box-shadow: inset 0px 1px 0px #9e8d84, 0px 5px 0px 0px #322620, 0px 8px 5px rgb(83, 83, 83);
@@ -326,8 +325,8 @@ export default {
 }
 
 #button2::before {
-	background-color:#8e98a5;
-  background-image:url(./assets/x.png);
+	background-color:#8e98a5;;
+	background-image:url(./assets/x.png);
 	background-repeat:no-repeat;
 	background-position:center center;
 	content:"";
