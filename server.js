@@ -85,6 +85,12 @@ io.on('connection', function (socket) {
     io.emit('round-done', data);
   });
 
+  // start listening for next turn
+  socket.on('we-got-a-winner', function (data) {
+    // console.log(data);
+    io.emit('we-got-a-winner', data);
+  });
+
 
 });
 

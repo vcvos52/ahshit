@@ -21,9 +21,9 @@ router.post('/saveTable', (req, res)=> {
       let name = req.body[1];
       let tricksWon = req.body[2];
       let wager = req.body[3];
-      ScoreData.addRoundResults(round, name, tricksWon, wager);
+      let ifWin = ScoreData.addRoundResults(round, name, tricksWon, wager);
       // console.log(req.session.roundResults);
-      res.status(200).end()
+      res.status(200).send(ifWin).end();
   });
 
 router.get('/getTable', (req, res) => {

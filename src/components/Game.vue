@@ -2,7 +2,7 @@
     
     <div v-bind:class="{ trick: (trickDone) }">
 
-      {{firstPlayedCard}}
+      <!-- {{firstPlayedCard}} -->
 
         <span id="logo">Round</span><br>
         <span style="margin:auto; width:2em; background:transparent; border:none; color:white; font-size:40px;text-align:center">{{round}}</span>
@@ -67,11 +67,26 @@
         </div>
         
         <div v-else-if="roundDone">
-          {{trickWinner}} won this round!
-          <button @click="nextRound()">Done</button>
+          <div v-if="winners.length > 0" style="font-size:20px; color:white; margin-bottom:10px">
+            <span v-for="(winner, i) in winners" v-bind:key="i"> {{winner}}, </span> won this round!
+          </div>
+          <div v-else style="font-size:15px; margin-bottom:10px; color:red">
+            Nobody won the round... Losers.
+          </div>
+          <button @click="nextRound()">Deal Cards!</button>
         </div>
 
-        <div v-else>
+        <div v-else-if="waitingForDeal">
+          <div v-if="winners.length > 0" style="font-size:20px; color:white; margin-bottom:10px">
+            <span v-for="(winner, i) in winners" v-bind:key="i"> {{winner}}, </span> won this round!
+          </div>
+          <div v-else style="font-size:15px; margin-bottom:10px; color:red">
+            Nobody won the round... Losers.
+          </div>
+          <span style="font-size:25px; color:white;">Waiting for {{all[turnIndex]['name']}} to Deal the Cards</span>
+        </div>
+
+        <div v-else-if="!waitingForDeal">
           <!-- {{currentTrick}} -->
           <label><span>Current Trick:</span> <br> 
           <button v-for="(card, i) in currentTrick"  class="card-no-hover" v-bind:key="i"><img :src="getImg(card)"></button>
@@ -158,6 +173,7 @@ export default {
   data() {
     return{
         trump: null,
+        winners: [],
         wrongSuit: false,
         baseAll: [],
         trickWinner: "",
@@ -165,6 +181,7 @@ export default {
         currentTrick: [],
         trickDone: false,
         roundDone: false,
+        waitingForDeal: false,
         tricksWon: 0,
         turnIndex: 0,
         waitturn:false,
@@ -368,6 +385,15 @@ export default {
     });
 // =======================================================
 
+    eventBus.$on('we-got-a-winner', data => {
+      if (!this.checkInAll(data)){
+        return;
+      }
+      this.winners.push(data);
+
+    });
+// =======================================================
+
     eventBus.$on('next-round', user => {
       if (!this.checkInAll(user)){
         return;
@@ -383,7 +409,7 @@ export default {
       setTimeout(function(){
         sup.submitResults();
         sup.trickDone = true;
-        sup.roundDone = true;
+
         sup.turnIndex = 0;
         let firstshallbelast = sup.baseAll.splice(0,1);
         sup.baseAll.push(firstshallbelast[0]);
@@ -393,9 +419,11 @@ export default {
         }
         sup.all = temp;
         if (sup.all[sup.turnIndex].name === sup.username){
+          sup.roundDone = true;
           sup.turn = true;
           sup.waitturn = false;
         } else {
+          sup.waitingForDeal = true;
           sup.turn = false;
           sup.waitturn = false;
         }
@@ -448,6 +476,7 @@ export default {
       if (!this.checkInAll(user)){
         return;
       }
+      this.winners = [];
       console.log("Right before suspicios axios call");
       axios.get('/api/score/getTable')
         .then(res => {
@@ -456,6 +485,7 @@ export default {
         }).catch(err => console.log(err));
 
         this.roundDone = false;
+        this.waitingForDeal = false;
         this.tricksWon = 0;
         this.round++;
         this.bet = true;
@@ -680,7 +710,12 @@ export default {
 
       let wager = this.tableData[this.round][this.username+"bet"];
 
-      axios.post('/api/score/addRoundResults', [this.round, this.username, this.tricksWon, wager]);
+      axios.post('/api/score/addRoundResults', [this.round, this.username, this.tricksWon, wager])
+        .then(res => {
+          if (res.data){
+            socket.emit('we-got-a-winner', this.username);
+          }
+        });
     },
 
 // =======================================================
@@ -690,6 +725,7 @@ export default {
     updateTable: function(){
 
       for (let i = 0; i < this.tableData.length; i++ ){
+        let sup = this;
         let round = this.tableData[i];
         let prevscore = 0
         if (i > 0){prevscore = this.tableData[i-1]}
@@ -700,6 +736,7 @@ export default {
           let bet = parseInt(round[name+'bet'], 10);
           if (roundWinners[name+'bet'] === 1){
             // console.log(prevscore)
+            sup.winners.push(name);
             if (i === 0){round[name+'score'] = bet + 10}
             else if (i > 0){round[name+'score'] = prevscore[name+'score'] + bet + 10}
           } else if (roundWinners[name+'bet'] === -1){

@@ -67,8 +67,10 @@ class ScoreData{
     static addRoundResults(round, name, tricksWon, wager){
         if (parseInt(wager, 10) === tricksWon){
             RoundResults[round][name+'bet'] = 1;
+            return true;
         } else {
             RoundResults[round][name+'bet'] = -1;
+            return false;
         }
     }
 

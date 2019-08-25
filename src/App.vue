@@ -133,6 +133,15 @@ export default {
 
 // =======================================================
 
+    socket.on('we-got-a-winner', user => {
+      if (this.gameOpen){
+        eventBus.$emit('we-got-a-winner', user);
+      }
+
+    });
+
+// =======================================================
+
     socket.on('player-left', user => {
       if (this.lobbyOpen){
         eventBus.$emit('player-left', user);
