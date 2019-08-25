@@ -2,6 +2,8 @@
     
     <div v-bind:class="{ trick: (trickDone) }">
 
+      {{firstPlayedCard}}
+
         <span id="logo">Round</span><br>
         <span style="margin:auto; width:2em; background:transparent; border:none; color:white; font-size:40px;text-align:center">{{round}}</span>
         <br>
@@ -76,8 +78,11 @@
           </label>
 
           <br><br>
-          <label><span>Your Hand:</span><br>
-          <button v-for="(card, i) in hand" @click="playCard(i)" v-bind:key="i" v-bind:id="i" name="cards" class="card"><img :src="getImg(card)"></button>
+
+          <label style="display:flex; justify-content:center; align-content:center; flex-wrap:wrap"><span style="width:100%">Your Hand:</span><br>
+            <div v-for="(card, i) in hand" v-bind:key="i" class="card">
+              <button  @click="playCard(i)"  v-bind:id="i" name="cards" class="card-inner"><img :src="getImg(card)"></button>
+            </div>
           </label>
 
           <!-- <button v-for="(card, i) in hand" @click="playCard(i)" v-bind:key="i" v-bind:id="i" name="cards">Suit: {{card.suit}} <br> <br> Rank: {{card.rank}}</button> -->
@@ -306,7 +311,9 @@ export default {
         }
 
         let sup = this;
-        this.firstPlayedCard = null;
+        if (data[2]){
+          this.firstPlayedCard = null;
+        }
         if (this.currentTrick.length === this.all.length){
           console.log("272 in socket..", this.all, this.turnIndex, this.trickWinner);
           let w = this.all.filter(p => p.name === this.trickWinner)[0];
@@ -390,6 +397,7 @@ export default {
           sup.waitturn = false;
         } else {
           sup.turn = false;
+          sup.waitturn = false;
         }
         
       }, 1000)
@@ -547,6 +555,8 @@ export default {
     playCard: async function(i){
       this.wrongSuit = false;
       if (this.turn && !(this.bet)){
+        console.log("Good Turn... ", i, this.hand, this.all, this.username);
+        this.waitturn = false;
         if (this.turnIndex > 0){
           let potentialCard = this.hand[i];
           if (potentialCard.suit !== this.firstPlayedCard.suit){
@@ -566,7 +576,7 @@ export default {
           this.firstPlayedCard = card[0];
           firstCardBoolean = true
         }
-        this.waitturn = false;
+        
         this.turnIndex++;
 
         let trick = [];
@@ -575,8 +585,10 @@ export default {
         }
 
         await socket.emit('card-played', [card, firstCardBoolean, this.username]);
-        console.log("504 in card played", this.turnIndex, this.all)
+        console.log("504 in card played", this.turnIndex, this.all);
+        let trickDoneBoolean = false;
         if (this.turnIndex === this.all.length){
+          trickDoneBoolean = true;
           await this.awardTrick(trick, card[0]);
           this.turnIndex = 0;
           if (this.hand.length === 0){
@@ -584,11 +596,12 @@ export default {
             socket.emit('next-round', this.username);
           } else{
             // console.log("Prior to socket", this.all, this.turnIndex, this.username);
-            socket.emit('next-turn', [this.turnIndex, this.username]);
+            socket.emit('next-turn', [this.turnIndex, this.username, trickDoneBoolean]);
           }
-        } else {socket.emit('next-turn', [this.turnIndex, this.username]);}
+        } else {socket.emit('next-turn', [this.turnIndex, this.username, trickDoneBoolean]);}
         
       } else {
+        console.log("SETTING WAITTURN TO TRUE... ", i, this.hand, this.all, this.username);
         this.waitturn = true;
       }
     },
@@ -648,7 +661,7 @@ export default {
         .then(res => {
           this.bet = false;
           this.play = true;
-          socket.emit('next-turn', [this.turnIndex, this.username]);
+          socket.emit('next-turn', [this.turnIndex, this.username, false]);
         });
 
 
@@ -747,9 +760,23 @@ export default {
 
 <style>
 
+.hand-elements{
+  
+}
+
 .card{
   -webkit-appearance: none;
   width: 6%;
+  padding: 0%;
+  border: 0%;
+  margin: 1%;
+  border-radius: 6%;
+  min-width: 60px;
+}
+
+.card-inner{
+  -webkit-appearance: none;
+  width: 100%;
   padding: 0%;
   border: 0%;
   margin: 1%;
