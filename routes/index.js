@@ -103,6 +103,8 @@ router.delete('/clearSession/:username', (req, res) => {
   req.session.logged = false;
   req.session.gamestarted = false;
   req.session.round = 0;
+  req.session.baseAll = null;
+  req.session.currentTrick = [];
   console.log(req.session.username, req.params.username)
   if (req.session.username){
     Users.deleteUser(req.params.username);

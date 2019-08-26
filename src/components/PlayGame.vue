@@ -1,5 +1,6 @@
 <template>
     <div>
+
         <div v-if="gameStarted===false">
 
             <div v-if="gameEnded===true">
@@ -98,7 +99,7 @@ export default {
         if (!this.gameStarted){
             this.gameStarted = true;
             axios.post("/setGameStarted")
-                .then(console.log("good")).catch(console.log("error on axios call in scoreCard method"));
+                .then(console.log("setGameStarted")).catch(console.log("error on axios call in scoreCard method"));
         }
 
     });

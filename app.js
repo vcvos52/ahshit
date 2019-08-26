@@ -21,5 +21,6 @@ app.use(session({ secret: 'super-secret-password', saveUninitialized: false, res
 app.use('/', indexRouter);
 app.use('/api/score', scoreCard);
 app.use('/api/online', onlineRouter);
+app.disable('etag');
 
 module.exports = app;

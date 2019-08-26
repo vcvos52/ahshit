@@ -1,6 +1,11 @@
 <template>
     
     <div v-bind:class="{ trick: (trickDone) }">
+        {{refresh}} <br>
+        {{all}} <br>
+        {{turnIndex}} <br>
+        {{username}} <br>
+        {{tableData}}<br>
 
       <!-- {{firstPlayedCard}} -->
 
@@ -21,11 +26,11 @@
 
         <div v-else>
           <div v-if="bet">
-              <span style="font-size:30px; color:red;">Waiting for {{all[turnIndex]['name']}} to Bet</span>
+              <span style="font-size:30px; color:red;">Waiting for {{allName}} to Bet</span>
           </div>
               
           <div v-if="play">
-              <span style="font-size:30px; color:red;">Waiting for {{all[turnIndex]['name']}} <span v-if="hand.length === cardsPerRound[round] && turnIndex > 0"> to Bet </span> <span v-else> to Play a Card </span> </span>
+              <span style="font-size:30px; color:red;">Waiting for {{allName}} <span v-if="hand.length === cardsPerRound[round] && turnIndex > 0"> to Bet </span> <span v-else> to Play a Card </span> </span>
           </div>
         </div>
 
@@ -83,7 +88,7 @@
           <div v-else style="font-size:15px; margin-bottom:10px; color:red">
             Nobody won the round... Losers.
           </div>
-          <span style="font-size:25px; color:white;">Waiting for {{all[turnIndex]['name']}} to Deal the Cards</span>
+          <span style="font-size:25px; color:white;">Waiting for {{allName}} to Deal the Cards</span>
         </div>
 
         <div v-else-if="!waitingForDeal">
@@ -126,7 +131,7 @@
           
         <br><br>
 
-        <table style="width:100%">
+        <table style="width:100%" v-bind:key="updatetablekey">
 
           <thead>
             <col style="width:auto; height:100%" v-for="(_, i) in this.headers" v-bind:key="i">
@@ -173,6 +178,7 @@ export default {
   data() {
     return{
         trump: null,
+        updatetablekey: 0, // this is an irrelavent data entry... dont worry about keeping state
         winners: [],
         wrongSuit: false,
         baseAll: [],
@@ -218,6 +224,19 @@ export default {
       initializer: Boolean,
     },
 
+  computed: {
+    allName: function() {
+      if (this.all === undefined || this.all[this.turnIndex] === undefined){
+        return "other player"
+      }
+      if ('name' in this.all[this.turnIndex]){
+        return this.all[this.turnIndex]['name']
+      } else {
+        return "other player";
+      }
+    }
+  },
+
 
   created: async function(){
 
@@ -226,6 +245,17 @@ export default {
     if (this.refresh){
 
       console.log("Refresh is TRUE");
+
+      await axios.get('/api/online/betOrPlay')
+        .then(res => {
+          if (res.data === 'bet'){
+            this.bet = true;
+            this.play = false;
+          } else if (res.data === 'play'){
+            this.play = true;
+            this.bet = false;
+          }
+        })
 
       await axios.get('/api/online/getdeck')
           .then(res => {
@@ -238,6 +268,22 @@ export default {
         .then(res => {this.all = res.data})
         .catch(err => {console.log("problem getting all")});
 
+      await axios.get('/username')
+        .then(res => {this.username = res.data});
+
+      await axios.get('/api/online/turnIndex')
+        .then(res => {
+          this.turnIndex = res.data;
+          if (this.all[this.turnIndex].name === this.username){
+            this.turn = true;
+          }
+        })
+        .catch(err => {console.log(err)});
+
+      await axios.get('/api/online/getBaseAll')
+        .then(res => {this.baseAll = res.data})
+        .catch(err => {console.log("problem getting all")});
+
       await axios.get(`/api/online/getHand`)
         .then(res => {this.hand = res.data});
 
@@ -245,49 +291,102 @@ export default {
         .then(res => {this.round = parseInt(res.data, 10)})
         .catch(err => {console.log(err)});
 
-      await axios.get('/username')
-        .then(res => {this.username = res.data});
+      let sup = this;
+      await axios.get('/api/score/getTable')
+          .then(res => {
+            console.log('++++++++++++', res.data);
+            this.tableData = res.data;
+            this.updatetablekey++;
+            axios.get('/api/score/getRoundResults')
+              .then(res2 => {
+                sup.roundResults = res2.data;
+          });
+            // this.$forceUpdate();
+          })
+          .catch(err => console.log(err));
+
+      await axios.get('/api/online/getTrick')
+        .then(res => {
+          this.currentTrick = res.data.cards;
+          this.firstPlayedCard = res.data.lead;
+          })
+        .catch(err => {console.log(err)});
+
+
 
     } else {
 
-      // for (let i = 0; i < this.all.length; i++){
-      //   let n = this.all[i]['name'];
-      //   this.tricksWon[n] = 0;
-      // }
+        // for (let i = 0; i < this.all.length; i++){
+        //   let n = this.all[i]['name'];
+        //   this.tricksWon[n] = 0;
+        // }
 
-      console.log("Refresh is false");
+        await axios.post('/api/online/setBet')
+          .catch(err => {console.log(err)});
 
-      for (let i = 0; i < this.all.length; i++){
-        this.baseAll.push(this.all[i]);
-      }
+        await axios.post(`/api/online/turnIndex/${this.turnIndex}`)
+          .catch(err => {console.log(err)});
 
-      if (this.initializer){
-        await axios.get('/api/online/setdeck')
-          .then(res => {
-            this.deck = res.data[0];
-            this.trump = res.data[1];
-            socket.emit('start-game', this.username);
-            })
-          .catch(err => {console.log("problem setting deck")});
-      }
+        await axios.post(`/api/online/setround/${this.round}`)
+            .catch(err => {console.log(err)});
+
+        console.log("Refresh is false");
+
+        for (let i = 0; i < this.all.length; i++){
+          this.baseAll.push(this.all[i]);
+        }
+
+        if (this.initializer){
+          await axios.get('/api/online/setdeck')
+            .then(res => {
+              this.deck = res.data[0];
+              this.trump = res.data[1];
+              socket.emit('start-game', this.username);
+              })
+            .catch(err => {console.log("problem setting deck")});
+        }
+        console.log('before init trick');
+        await axios.post('/api/online/initTrick');
+
+        await axios.post('/api/online/setall', this.all)
+          .catch(err => {console.log("problem setting all")});
+
+        await axios.post('/api/online/setBaseAll', this.baseAll)
+          .catch(err => {console.log(err)});
+
+        await axios.get(`/api/online/dealHand/${this.cardsPerRound[this.round]}`)
+          .then(res => {this.hand = res.data})
+
+        await axios.get('/api/online/getdeck')
+            .then(res => {
+              this.deck = res.data[0];
+              this.trump = res.data[1];
+              })
+          .catch(err => {console.log("problem getting deck")});
+
+        if (this.all[this.turnIndex].name === this.username){
+          this.turn = true;
+        }
+
+        for (let row of this.tableData){
+          for (let i=0; i < this.all.length; i++){
+            // console.log(this.numberList)
+            row[this.all[i]['name']+"score"] = 0;
+            row[this.all[i]['name']+'bet'] = 0;
+          }
+        }
+        axios.post("/api/score/saveTable", this.tableData)
 
 
-      await axios.post('/api/online/setall', this.all)
-        .catch(err => {console.log("problem setting all")});
+        for (let row of this.roundResults){
+          for (let i=0; i < this.all.length; i++){
+            // console.log(this.numberList)
+            row[this.all[i]['name']+"bet"] = 0;
+            row['complete'] = false;
+          }
+        }
+        axios.post("/api/score/saveRoundResults", this.roundResults)
 
-      await axios.get(`/api/online/dealHand/${this.cardsPerRound[this.round]}`)
-        .then(res => {this.hand = res.data})
-
-      await axios.get('/api/online/getdeck')
-          .then(res => {
-            this.deck = res.data[0];
-            this.trump = res.data[1];
-            })
-        .catch(err => {console.log("problem getting deck")});
-
-      if (this.all[this.turnIndex].name === this.username){
-        this.turn = true;
-      }
     }
 
     for (let player of this.all){
@@ -295,25 +394,6 @@ export default {
       this.headers.push(player.name + "'s " + "bet")
     }
     
-    for (let row of this.tableData){
-      for (let i=0; i < this.all.length; i++){
-        // console.log(this.numberList)
-        row[this.all[i]['name']+"score"] = 0;
-        row[this.all[i]['name']+'bet'] = 0;
-      }
-    }
-    axios.post("/api/score/saveTable", this.tableData)
-
-
-    for (let row of this.roundResults){
-      for (let i=0; i < this.all.length; i++){
-        // console.log(this.numberList)
-        row[this.all[i]['name']+"bet"] = 0;
-        row['complete'] = false;
-      }
-    }
-    axios.post("/api/score/saveRoundResults", this.roundResults)
-
 
   },
 
@@ -322,11 +402,11 @@ export default {
 // =======================================================
 
     eventBus.$on('next-turn', data => {
-        console.log(this.username, data, this.all);
+        console.log(this.username, data, this.all, this.currentTrick);
         if (!this.checkInAll(data[1])){
           return;
         }
-
+        console.log('made it past the check in');
         let sup = this;
         if (data[2]){
           this.firstPlayedCard = null;
@@ -345,6 +425,8 @@ export default {
             console.log(newall)
           }
           this.all = newall;
+          axios.post('/api/online/setall', this.all)
+            .catch(err => {console.log("problem setting all", err)});
           console.log("283 in socket..", this.all, this.turnIndex, data[0]);
           let crds = document.getElementsByName('cards');
           for (let i = 0; i< crds.length; i++){
@@ -357,6 +439,8 @@ export default {
         }
 
         this.turnIndex = data[0];
+        axios.post(`/api/online/turnIndex/${this.turnIndex}`)
+          .catch(err => {console.log(err)});
         if (this.all[this.turnIndex].name === this.username){
           this.turn = true;
           this.waitturn = false;
@@ -366,7 +450,7 @@ export default {
 
         axios.get('/api/score/getTable')
           .then(res => {
-            console.log(res);
+            // console.log(res);
             this.tableData = res.data;
           })
           .catch(err => console.log(err));
@@ -381,6 +465,10 @@ export default {
       this.currentTrick.push(data[0][0]);
       if (data[1]){
         this.firstPlayedCard = data[0][0];
+        axios.post('/api/online/createTrick', this.firstPlayedCard)
+          .catch(err => console.log("PROBLEM CREATING TRICK", err));
+      } else {
+        axios.post('/api/online/addToTrick', data[0][0])
       }
     });
 // =======================================================
@@ -411,6 +499,8 @@ export default {
         sup.trickDone = true;
 
         sup.turnIndex = 0;
+        axios.post(`/api/online/turnIndex/${sup.turnIndex}`)
+        .catch(err => {console.log(err)});
         let firstshallbelast = sup.baseAll.splice(0,1);
         sup.baseAll.push(firstshallbelast[0]);
         let temp = [];
@@ -418,6 +508,15 @@ export default {
           temp.push(sup.baseAll[i]);
         }
         sup.all = temp;
+
+        axios.post('/api/online/setall', temp)
+          .then(() => console.log(sup.all + ' is the new all'))
+          .catch(err => {console.log('Error setting all 425.', err)});
+
+        axios.post('/api/online/setBaseAll', sup.baseAll)
+          .then(() => console.log("Base all set to ", sup.baseAll))
+          .catch(err => {console.log("ERROR SETTING BASE ALL", err)});
+
         if (sup.all[sup.turnIndex].name === sup.username){
           sup.roundDone = true;
           sup.turn = true;
@@ -441,6 +540,7 @@ export default {
       }
       this.trickDone = false;
       this.currentTrick = [];
+      axios.delete('/api/online/trick');
     });
 // =======================================================
 
@@ -490,12 +590,14 @@ export default {
         this.round++;
         this.bet = true;
         this.play = false;
+        axios.post('/api/online/setBet')
+          .catch(err => {console.log(err)});
 
         axios.get('/api/score/getRoundResults')
           .then(res => {
             this.roundResults = res.data;
             this.updateTable()
-          })
+          });
         // console.log("400 right before dealing hand", this.deck, this.hand);
         this.dealHand();
 
@@ -608,6 +710,8 @@ export default {
         }
         
         this.turnIndex++;
+        axios.post(`/api/online/turnIndex/${this.turnIndex}`)
+        .catch(err => {console.log(err)});
 
         let trick = [];
         for (let i=0; i< this.currentTrick.length; i++){
@@ -621,6 +725,8 @@ export default {
           trickDoneBoolean = true;
           await this.awardTrick(trick, card[0]);
           this.turnIndex = 0;
+          axios.post(`/api/online/turnIndex/${this.turnIndex}`)
+            .catch(err => {console.log(err)});
           if (this.hand.length === 0){
             await this.newDeck();
             socket.emit('next-round', this.username);
@@ -680,17 +786,21 @@ export default {
 
 // =======================================================
 
-    submitBet: function(){
+    submitBet: async function(){
       this.waitturn = false;
       this.turn = false;
       this.turnIndex ++;
       if (this.turnIndex === this.all.length){
         this.turnIndex = 0;
       }
-      axios.post("/api/score/saveTable", this.tableData)
+      await axios.post(`/api/online/turnIndex/${this.turnIndex}`)
+        .catch(err => {console.log(err)});
+      await axios.post("/api/score/saveTable", this.tableData)
         .then(res => {
           this.bet = false;
           this.play = true;
+          axios.post('/api/online/setPlay')
+          .catch(err => {console.log(err)});
           socket.emit('next-turn', [this.turnIndex, this.username, false]);
         });
 
@@ -736,7 +846,6 @@ export default {
           let bet = parseInt(round[name+'bet'], 10);
           if (roundWinners[name+'bet'] === 1){
             // console.log(prevscore)
-            sup.winners.push(name);
             if (i === 0){round[name+'score'] = bet + 10}
             else if (i > 0){round[name+'score'] = prevscore[name+'score'] + bet + 10}
           } else if (roundWinners[name+'bet'] === -1){
@@ -761,6 +870,9 @@ export default {
     getImg: function(card){
       if (!card){
         return require('../assets/cards/empty.jpg');
+      }
+      if (card['rank'] === 'A' && card['suit'] === 'D'){
+        return require('../assets/cards/acediamonds.png')
       }
       return require('../assets/cards/'+card['rank']+card['suit']+'.png');
     }

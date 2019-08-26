@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Users = require('../models/Users');
 const CardDeck = require('../models/CardDeck');
+const Trick = require('../models/Trick');
 
 router.post('/login', function(req, res) {
     req.session.username = req.body.name;
@@ -60,10 +61,18 @@ router.post('/setall', function(req, res){
     res.status(200).end();
 });
 
+router.post('/setBaseAll', function(req, res){
+    req.session.baseAll = req.body;
+    res.status(200).end();
+})
+
 router.get('/getall', function(req, res){
     res.status(200).send(req.session.all).end();
 });
 
+router.get('/getBaseAll', function(req, res){
+    res.status(200).send(req.session.baseAll).end();
+});
 
 /**
  * param: Number of cards to be dealt
@@ -79,7 +88,7 @@ router.get('/dealHand/:n', function(req, res){
         res.status(401).end();
         return;
     }
-    console.log("HAND IN ONLINE ROUTE", hand);
+    // console.log("HAND IN ONLINE ROUTE", hand);
     res.status(200).send(hand).end();
 });
 
@@ -103,6 +112,62 @@ router.get('/getround/', function(req, res){
     res.status(200).json(req.session.round).end();
 });
 
+router.post('/createTrick', function(req, res){
+    req.session.currentTrick = new Trick(req.body);
+    console.log('------------------', req.session.currentTrick);
+    res.status(200).end();
+});
+
+router.post('/addToTrick', function(req, res) {
+    let currentTrick = req.session.currentTrick;
+    Trick.addCard(currentTrick, req.body);
+    res.status(200).end();
+});
+
+router.get('/getTrick', function(req, res) {
+    let trick = req.session.currentTrick;
+    console.log(trick);
+    res.status(200).send(trick).end();
+});
+
+router.delete('/trick', function(req, res){
+    req.session.currentTrick = new Trick(false);
+    res.status(200).end();
+});
+
+router.post('/initTrick', function(req, res){
+    req.session.currentTrick = new Trick(false);
+    res.status(200).end();
+});
+
+router.post('/turnIndex/:index', function(req, res){
+    req.session.turnIndex = req.params.index;
+    res.status(200).end();
+});
+
+router.get('/turnIndex', function(req ,res){
+    res.status(200).send(req.session.turnIndex).end();
+});
+
+router.post('/setBet', function(req, res){
+    req.session.bet = true;
+    req.session.play = false;
+    res.status(200).end();
+});
+
+router.post('/setPlay', function(req, res){
+    req.session.play = true;
+    req.session.bet = false;
+    res.status(200).end();
+});
+
+router.get('/betOrPlay', function(req, res){
+    if (req.session.bet){
+        res.status(200).send('bet').end();
+    } else if (req.session.play){
+        res.status(200).send('play').end();
+    }
+})
 
 /**
  * sets deck to null
