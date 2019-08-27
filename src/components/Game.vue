@@ -38,10 +38,15 @@
 
         <span style="font-size:30px; color:white;">Number of tricks won: {{tricksWon}}</span>
 
-        <br><br>
+        <br><br><br>
 
-        <!-- {{all}} -->
-        <!-- {{username}} -->
+        <div class="opponents">
+          <span style="font-size:20px; color:white">Opponents:</span>
+          <div v-for="user in opponents" v-bind:key="user.name">
+            <span style="font-size:20px; color:white; margin-bottom:5px">{{user.name}}</span><br>
+            <span v-bind:class="getClass(user)" style="color:white; font-size:15">{{opponentTricks[user.name]}} tricks won. {{tableData[round][user.name+"bet"]}} tricks needed.</span>
+          </div>
+        </div>
         
         <br><br>
         
@@ -214,6 +219,7 @@ export default {
           {'round': 17}, {'round': 18}, {'round': 19}
         ],
         cardValueMapping: {'2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, '10':10, 'J':11, 'Q':12, 'K':13, 'A':14},
+        opponentTricks: {}
     }
   },
 
@@ -234,6 +240,10 @@ export default {
       } else {
         return "other player";
       }
+    },
+
+    opponents: function(){
+      return this.all.filter(user => user.name !== this.username);
     }
   },
 
@@ -366,6 +376,10 @@ export default {
 
         if (this.all[this.turnIndex].name === this.username){
           this.turn = true;
+        }
+
+        for (let player of this.all){
+          this.opponentTricks[player.name] = 0;
         }
 
         for (let row of this.tableData){
@@ -568,6 +582,7 @@ export default {
         this.tricksWon++
       }
       this.trickWinner = data[1].username;
+      this.opponentTricks[this.trickWinner] = this.opponentTricks[this.trickWinner] + 1;
       
     });
 // =======================================================
@@ -590,6 +605,9 @@ export default {
         this.round++;
         this.bet = true;
         this.play = false;
+        for (let player of this.all){
+          this.opponentTricks[player.name] = 0;
+        }
         axios.post('/api/online/setBet')
           .catch(err => {console.log(err)});
 
@@ -626,6 +644,13 @@ export default {
               }
           }
           return false;
+      },
+
+      getClass: function(user){
+        return {
+          'won': this.opponentTricks[user.name] == this.tableData[this.round][user.name+'bet'],
+          'lost': this.opponentTricks[user.name] > this.tableData[this.round][user.name+'bet']
+        }
       },
 
 // =======================================================
