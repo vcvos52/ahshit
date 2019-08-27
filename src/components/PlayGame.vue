@@ -1,7 +1,7 @@
 <template>
     <div>
-        {{username}}
-        {{all}}
+        <!-- {{username}} -->
+        <!-- {{all}} -->
         <div v-if="gameStarted===false">
 
             <div v-if="gameEnded===true">

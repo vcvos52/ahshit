@@ -1,11 +1,11 @@
 <template>
     
     <div v-bind:class="{ trick: (trickDone) }">
-        {{refresh}} <br>
-        {{all}} <br>
-        {{turnIndex}} <br>
-        {{username}} <br>
-        {{tableData}}<br>
+        <!-- {{refresh}} <br> -->
+        <!-- {{all}} <br> -->
+        <!-- {{turnIndex}} <br> -->
+        <!-- {{username}} <br> -->
+        <!-- {{tableData}}<br> -->
 
       <!-- {{firstPlayedCard}} -->
 
