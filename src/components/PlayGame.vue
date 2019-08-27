@@ -1,6 +1,7 @@
 <template>
     <div>
-
+        {{username}}
+        {{all}}
         <div v-if="gameStarted===false">
 
             <div v-if="gameEnded===true">
@@ -64,6 +65,13 @@ export default {
           if (data.data === 'gamestarted'){
             this.refresh = true;
             this.gameStarted = true;
+            axios.get('/username')
+                .then(res => {
+                    this.username = res.data;
+                    axios.get('/api/online/getall')
+                        .then(res => {this.all = res.data})
+                        .catch(err => {console.log("problem getting all")});
+                });
         }
       }).catch(err => console.log(err));
 
@@ -88,7 +96,7 @@ export default {
                 });
         } else {
             let included = this.checkInAll(user);
-            console.log("PlayGame 83 -- ", this.username, this.all);
+            console.log("PlayGame 83 -- ", user, this.all);
             if (included){
                 eventBus.$emit('clear');
             }
