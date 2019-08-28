@@ -937,7 +937,7 @@ export default {
 </script>
 
 
-<style>
+<style scoped>
 
 .hand-elements{
   
@@ -945,12 +945,12 @@ export default {
 
 .card{
   -webkit-appearance: none;
-  width: 6%;
+  width: 5%;
   padding: 0%;
   border: 0%;
   margin: 1%;
   border-radius: 6%;
-  min-width: 60px;
+  min-width: 50px;
 }
 
 .card-inner{
@@ -965,12 +965,12 @@ export default {
 
 .card-no-hover{
   -webkit-appearance: none;
-  width: 6%;
+  width: 5%;
   padding: 0%;
   border: 0%;
   margin: 1%;
   border-radius: 6%;
-  min-width: 60px;
+  min-width: 50px;
 }
 
 
@@ -1055,20 +1055,22 @@ img {
 
 .chat{
   position: fixed;
-  height: 100%;
-  width: 75%;
+  height: 100vh;
+  width: 30%;
   right:0px;
   top: 0px;
-  background-color:  hsl(263,45%,8%);
-  opacity: 0.7;
+  /* background-color:  hsl(263,45%,8%); */
+  /* opacity: 0.7; */
   z-index: 1;
   overflow-y: scroll;
 }
 
 .chat-toggle{
   -webkit-appearance: none;
-  width: 50px;
-  height: 37px;
+  width: 6%;
+  min-width: 60px;
+  height: 5%;
+  min-height: 30px;
   padding: 5px;
   position:fixed; 
   top:0px; 

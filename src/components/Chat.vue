@@ -1,15 +1,15 @@
 <template>
-    <div class="chat">
+    <div class="chat-window">
         <ul>
             <li v-for="(message, i) in messages" v-bind:key="i" v-bind:class="getMessageClass(message)">
                 <span>{{message.message}}</span><br>
                 <span>From: {{message.name}}</span>
             </li>
         </ul>
-    <form @submit.prevent="postMessage" class="send-message">
-        <label for="mes">Enter Message</label><input class="textarea" id="mes" type="text" v-model="message"/>
-        <input class="button" type="submit" value="Send Message"/>
-    </form>
+        <form autocomplete="off" @submit.prevent="postMessage" class="send-message">
+            <input class="textarea" id="mes" type="text" v-model="message"/>
+            <input class="send-button" type="submit" value="Send Message"/>
+        </form>
     </div>
 </template>
 
@@ -108,24 +108,33 @@ body {
   border-radius: 5px;
 }
 
-.chat {
-  width: 33%;
+.chat-window {
+
+  width: 30%;
   float:left;
   background: #e8f6ffd1;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
-  
+  min-width: 490px;
   color: #434651;
   
 }
 
 .send-message{
-    position: absolute;
-    bottom: 5%;
-    width:100%;
+    position: fixed;
+    bottom:0px;
+    padding-bottom: 30px;
+    margin-right: 2%;
+    width:30%;
+    min-width: 492px;
+    min-height: 50px;
     display: flex;
+    flex-wrap: wrap;
     align-content: center;
-    justify-content: center;
+    justify-content: left;
+    background-color: rgba(193, 208, 218, 0.82);
+    opacity: 1;
+    height: 10%;
 }
 
 .message {      
@@ -135,25 +144,27 @@ body {
     font-size: 16px;
     border-radius: 7px;
     margin-bottom: 30px;
-    width: 90%;
+    width: 80%;
     position: relative;
-
 }
 
 .my-message {
+    list-style-type: none;
     color: white;
     padding: 18px 20px;
     line-height: 26px;
     font-size: 16px;
     border-radius: 7px;
     margin-bottom: 30px;
-    width: 90%;
+    width: 80%;
     position: relative;
     background: rgb(96, 109, 91);
     text-align: right;
+    margin-left: 80px;
 }
 
 .other-message {
+    list-style-type: none;
     background: rgb(130, 151, 170);
     color: white;
     padding: 18px 20px;
@@ -161,13 +172,38 @@ body {
     font-size: 16px;
     border-radius: 7px;
     margin-bottom: 30px;
-    width: 90%;
+    width: 80%;
     position: relative;
+    text-align: left;
+    margin-right: 80px;
 }
 
 li {
     padding-bottom: 20px;
+    margin-left: 40px;
+    margin-right:40px;
 }
 
+ul{
+    padding: 0;
+    margin-top: 10%;
+    margin-bottom:22%;
+    display: flex;
+    flex-flow: column;
+    width: 100%;
+}
+
+.textarea{
+    -webkit-appearance: none;
+    width: 73%;
+    height: 100%;
+    max-height: 40px;
+}
+
+.send-button{
+    width: 25%;
+    height: 100%;
+    max-height: 40px
+}
 
 </style>
