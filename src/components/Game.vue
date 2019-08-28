@@ -40,9 +40,9 @@
 
         <br><br><br>
 
+        <span style="font-size:20px; color:white">Opponents:</span>
         <div class="opponents">
-          <span style="font-size:20px; color:white">Opponents:</span>
-          <div v-for="user in opponents" v-bind:key="user.name">
+          <div v-for="user in opponents" v-bind:key="user.name" style="border:1px solid darkgrey; padding:1%;">
             <span style="font-size:20px; color:white; margin-bottom:5px">{{user.name}}</span><br>
             <span v-bind:class="getClass(user)" style="color:white; font-size:15">{{opponentTricks[user.name]}} tricks won. {{tableData[round][user.name+"bet"]}} tricks needed.</span>
           </div>
@@ -1133,6 +1133,13 @@ img {
   flex-wrap: wrap;
   justify-content: center;
   align-content: center;
+}
+
+.opponents{
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  
 }
 
 </style>
