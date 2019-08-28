@@ -5,7 +5,7 @@ const ScoreData = require('../models/ScoreData');
 router.post('/saveTable', (req, res)=> {
     req.session.tableData = req.body;
     ScoreData.setData(req.body);
-    console.log(req.session.tableData);
+    // console.log(req.session.tableData);
     res.status(200).end()
   });
 

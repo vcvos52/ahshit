@@ -172,6 +172,7 @@ import axios from "axios";
 import {socket, eventBus} from "../main";
 import { setTimeout } from 'timers';
 import { copyFile } from 'fs';
+import { async } from 'q';
 
 
 export default {
@@ -371,6 +372,51 @@ export default {
             .then(res => {
               this.deck = res.data[0];
               this.trump = res.data[1];
+              let temp = [];
+              let suits;
+              switch (this.trump.suit){
+                case "D":
+                  suits = ["C", "H", "S", "D"];
+                  for (let suit of suits){
+                    for (let card of this.hand){
+                      if (card.suit === suit) {
+                        temp.push(card);
+                      }
+                    }
+                  }
+                  break;
+                case "H":
+                  suits = ["C", "D", "S", "H"];
+                  for (let suit of suits){
+                    for (let card of this.hand){
+                      if (card.suit === suit) {
+                        temp.push(card);
+                      }
+                    }
+                  }
+                  break;
+                case "C":
+                  suits = ["H", "S", "D", "C"];
+                  for (let suit of suits){
+                    for (let card of this.hand){
+                      if (card.suit === suit) {
+                        temp.push(card);
+                      }
+                    }
+                  }
+                  break;
+                case "S":
+                  suits = ["D", "C", "H", "S"];
+                  for (let suit of suits){
+                    for (let card of this.hand){
+                      if (card.suit === suit) {
+                        temp.push(card);
+                      }
+                    }
+                  }
+                  break;
+              }
+              this.hand = temp;
               })
           .catch(err => {console.log("problem getting deck")});
 
@@ -415,33 +461,33 @@ export default {
 
 // =======================================================
 
-    eventBus.$on('next-turn', data => {
-        console.log(this.username, data, this.all, this.currentTrick);
+    eventBus.$on('next-turn', async data => {
+        // console.log(this.username, data, this.all, this.currentTrick);
         if (!this.checkInAll(data[1])){
           return;
         }
-        console.log('made it past the check in');
+        // console.log('made it past the check in');
         let sup = this;
         if (data[2]){
           this.firstPlayedCard = null;
         }
         if (this.currentTrick.length === this.all.length){
-          console.log("272 in socket..", this.all, this.turnIndex, this.trickWinner);
+          // console.log("272 in socket..", this.all, this.turnIndex, this.trickWinner);
           let w = this.all.filter(p => p.name === this.trickWinner)[0];
           let index = this.all.indexOf(w);
           let newall = []
           for (let i = index; i < this.all.length; i++){
             newall.push(this.all[i]);
-            console.log(newall);
+            // console.log(newall);
           }
           for (let i = 0; i < index; i++){
             newall.push(this.all[i]);
-            console.log(newall)
+            // console.log(newall)
           }
           this.all = newall;
-          axios.post('/api/online/setall', this.all)
+          await axios.post('/api/online/setall', this.all)
             .catch(err => {console.log("problem setting all", err)});
-          console.log("283 in socket..", this.all, this.turnIndex, data[0]);
+          // console.log("283 in socket..", this.all, this.turnIndex, data[0]);
           let crds = document.getElementsByName('cards');
           for (let i = 0; i< crds.length; i++){
             let butt = crds[i];
@@ -453,7 +499,7 @@ export default {
         }
 
         this.turnIndex = data[0];
-        axios.post(`/api/online/turnIndex/${this.turnIndex}`)
+        await axios.post(`/api/online/turnIndex/${this.turnIndex}`)
           .catch(err => {console.log(err)});
         if (this.all[this.turnIndex].name === this.username){
           this.turn = true;
@@ -462,7 +508,7 @@ export default {
           this.turn = false;
         }
 
-        axios.get('/api/score/getTable')
+        await axios.get('/api/score/getTable')
           .then(res => {
             // console.log(res);
             this.tableData = res.data;
@@ -548,24 +594,24 @@ export default {
     });
 // =======================================================
 
-    eventBus.$on('trick-done', user => {
+    eventBus.$on('trick-done', async user => {
       if (!this.checkInAll(user)){
         return;
       }
       this.trickDone = false;
       this.currentTrick = [];
-      axios.delete('/api/online/trick');
+      await axios.delete('/api/online/trick');
     });
 // =======================================================
 
-    eventBus.$on('deck-updated', user =>{
+    eventBus.$on('deck-updated', async user =>{
         console.log('**********************', this.username, this.all, user);
         if (!this.checkInAll(user)){
           console.log("USER NOT IN ALL!!!!!");
           return;
         }
         // console.log('MOTHER MOTHER AHHHHHHH');
-        axios.get('/api/online/getdeck')
+        await axios.get('/api/online/getdeck')
           .then(res => {
             this.deck = res.data[0];
             this.trump = res.data[1];
@@ -587,13 +633,13 @@ export default {
     });
 // =======================================================
 
-    eventBus.$on('round-done', user => {
+    eventBus.$on('round-done', async user => {
       if (!this.checkInAll(user)){
         return;
       }
       this.winners = [];
       console.log("Right before suspicios axios call");
-      axios.get('/api/score/getTable')
+      await axios.get('/api/score/getTable')
         .then(res => {
           console.log(res.data)
           this.tableData = res.data;
@@ -611,18 +657,64 @@ export default {
         axios.post('/api/online/setBet')
           .catch(err => {console.log(err)});
 
-        axios.get('/api/score/getRoundResults')
+        await axios.get('/api/score/getRoundResults')
           .then(res => {
             this.roundResults = res.data;
             this.updateTable()
           });
         // console.log("400 right before dealing hand", this.deck, this.hand);
-        this.dealHand();
+        await this.dealHand();
 
-        axios.get('/api/online/getdeck')
+        await axios.get('/api/online/getdeck')
           .then(res => {
             this.deck = res.data[0];
             this.trump = res.data[1];
+            let temp = [];
+            let suits;
+            switch (this.trump.suit){
+              case "D":
+                suits = ["C", "H", "S", "D"];
+                for (let suit of suits){
+                  for (let card of this.hand){
+                    if (card.suit === suit) {
+                      temp.push(card);
+                    }
+                  }
+                }
+                break;
+              case "H":
+                suits = ["C", "D", "S", "H"];
+                for (let suit of suits){
+                  for (let card of this.hand){
+                    if (card.suit === suit) {
+                      temp.push(card);
+                    }
+                  }
+                }
+                break;
+              case "C":
+                suits = ["H", "S", "D", "C"];
+                for (let suit of suits){
+                  for (let card of this.hand){
+                    if (card.suit === suit) {
+                      temp.push(card);
+                    }
+                  }
+                }
+                break;
+              case "S":
+                suits = ["D", "C", "H", "S"];
+                for (let suit of suits){
+                  for (let card of this.hand){
+                    if (card.suit === suit) {
+                      temp.push(card);
+                    }
+                  }
+                }
+                break;
+            }
+            console.log(temp);
+            this.hand = temp;
             })
           .catch(err => {console.log("problem getting deck")});
 
