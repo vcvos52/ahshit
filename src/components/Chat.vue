@@ -2,7 +2,7 @@
     <div class="chat-window">
         <ul>
             <li v-for="(message, i) in messages" v-bind:key="i" v-bind:class="getMessageClass(message)">
-                <span>{{message.message}}</span><br>
+                <span style="width:100%; overflow-wrap:break-word">{{message.message}}</span><br>
                 <span>From: {{message.name}}</span>
             </li>
         </ul>
@@ -151,7 +151,7 @@ body {
 .my-message {
     list-style-type: none;
     color: white;
-    padding: 18px 20px;
+    padding: 18px 40px;
     line-height: 26px;
     font-size: 16px;
     border-radius: 7px;
@@ -160,7 +160,7 @@ body {
     position: relative;
     background: rgb(96, 109, 91);
     text-align: right;
-    margin-left: 80px;
+    margin-left: 17%;
 }
 
 .other-message {
@@ -175,7 +175,7 @@ body {
     width: 80%;
     position: relative;
     text-align: left;
-    margin-right: 80px;
+    margin-right: 17%;
 }
 
 li {
