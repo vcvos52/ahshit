@@ -960,7 +960,7 @@ export default {
   border: 0%;
   margin: 1%;
   border-radius: 6%;
-  min-width: 60px;
+  min-width: 50px;
 }
 
 .card-no-hover{
@@ -1059,8 +1059,7 @@ img {
   width: 30%;
   right:0px;
   top: 0px;
-  /* background-color:  hsl(263,45%,8%); */
-  /* opacity: 0.7; */
+
   z-index: 1;
   overflow-y: scroll;
 }

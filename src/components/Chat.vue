@@ -115,7 +115,7 @@ body {
   background: #e8f6ffd1;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
-  min-width: 490px;
+  min-width: 290px;
   color: #434651;
   
 }
@@ -126,7 +126,7 @@ body {
     padding-bottom: 30px;
     margin-right: 2%;
     width:30%;
-    min-width: 492px;
+    min-width: 290px;
     min-height: 50px;
     display: flex;
     flex-wrap: wrap;
