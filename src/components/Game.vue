@@ -663,63 +663,66 @@ export default {
             this.updateTable()
           });
         // console.log("400 right before dealing hand", this.deck, this.hand);
-        await this.dealHand();
+        await this.dealHand()
 
         await axios.get('/api/online/getdeck')
           .then(res => {
             this.deck = res.data[0];
             this.trump = res.data[1];
-            let temp = [];
-            let suits;
-            switch (this.trump.suit){
-              case "D":
-                suits = ["C", "H", "S", "D"];
-                for (let suit of suits){
-                  for (let card of this.hand){
-                    if (card.suit === suit) {
-                      temp.push(card);
-                    }
-                  }
-                }
-                break;
-              case "H":
-                suits = ["C", "D", "S", "H"];
-                for (let suit of suits){
-                  for (let card of this.hand){
-                    if (card.suit === suit) {
-                      temp.push(card);
-                    }
-                  }
-                }
-                break;
-              case "C":
-                suits = ["H", "S", "D", "C"];
-                for (let suit of suits){
-                  for (let card of this.hand){
-                    if (card.suit === suit) {
-                      temp.push(card);
-                    }
-                  }
-                }
-                break;
-              case "S":
-                suits = ["D", "C", "H", "S"];
-                for (let suit of suits){
-                  for (let card of this.hand){
-                    if (card.suit === suit) {
-                      temp.push(card);
-                    }
-                  }
-                }
-                break;
-            }
-            console.log(temp);
-            this.hand = temp;
             })
           .catch(err => {console.log("problem getting deck")});
 
-        axios.post(`/api/online/setround/${this.round}`)
+        await axios.post(`/api/online/setround/${this.round}`)
           .catch(err => {console.log(err)});
+
+        let temp = [];
+        let suits;
+        console.log(this.hand, this.trump)
+        switch (this.trump.suit){
+          case "D":
+            suits = ["C", "H", "S", "D"];
+            for (let suit of suits){
+              for (let card of this.hand){
+                console.log(suit, card);
+                if (card.suit === suit) {
+                  temp.push(card);
+                }
+              }
+            }
+            break;
+          case "H":
+            suits = ["C", "D", "S", "H"];
+            for (let suit of suits){
+              for (let card of this.hand){
+                if (card.suit === suit) {
+                  temp.push(card);
+                }
+              }
+            }
+            break;
+          case "C":
+            suits = ["H", "S", "D", "C"];
+            for (let suit of suits){
+              for (let card of this.hand){
+                if (card.suit === suit) {
+                  temp.push(card);
+                }
+              }
+            }
+            break;
+          case "S":
+            suits = ["D", "C", "H", "S"];
+            for (let suit of suits){
+              for (let card of this.hand){
+                if (card.suit === suit) {
+                  temp.push(card);
+                }
+              }
+            }
+            break;
+        }
+        console.log(temp);
+        this.hand = temp;
     });
 // =======================================================
 
