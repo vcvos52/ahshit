@@ -2,7 +2,7 @@
   <div id="app">
     <!-- {{username}} -->
     <!-- {{all}} -->
-      <button id="button2" style=" margin-bottom:10%" @click="clearSession">Start Over</button>
+      <button id="button2" style=" margin-bottom:3%" @click="clearSession">Start Over</button>
       <div style="width:75%; margin:auto" v-if="init===true">
         <button id="button1" @click="scoreCard">Score Card</button>
         <button id="button1" @click="playGame">Play Game</button>
@@ -224,10 +224,18 @@ export default {
       if (this.gameOpen){
         eventBus.$emit('round-done', user);
       }
-        
-
+      
     });
 // =======================================================
+
+    socket.on('message-posted', data => {
+      console.log("in App", data);
+      if (this.gameOpen){
+        console.log("game was open...", data);
+        eventBus.$emit('message-posted', data);
+      }
+      
+    });
 
   },
 

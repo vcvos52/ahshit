@@ -90,8 +90,12 @@ io.on('connection', function (socket) {
     // console.log(data);
     io.emit('we-got-a-winner', data);
   });
-
-
+  
+  // start listening for next turn
+  socket.on('message-posted', function (data) {
+    console.log("in socket", data);
+    io.emit('message-posted', data);
+  });
 });
 
 /**

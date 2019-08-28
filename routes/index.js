@@ -3,6 +3,7 @@ const router = express.Router();
 const Users = require('../models/Users');
 const CardDeck = require('../models/CardDeck');
 const ScoreData = require('../models/ScoreData');
+const Messages = require('../models/Messages');
 
 /* GET home page. */
 router.get('/:*', function(req, res) {
@@ -92,6 +93,7 @@ router.delete('/clearSession/:username', (req, res) => {
   CardDeck.endGame();
   ScoreData.endGame();
   Users.emptyHands();
+  Messages.clearMessages();
 
   req.session.playGame = false;
   req.session.scoreCard = false;

@@ -1,50 +1,44 @@
 <template>
     
     <div v-bind:class="{ trick: (trickDone) }">
-        <!-- {{refresh}} <br> -->
-        <!-- {{all}} <br> -->
-        <!-- {{turnIndex}} <br> -->
-        <!-- {{username}} <br> -->
-        <!-- {{tableData}}<br> -->
-
-      <!-- {{firstPlayedCard}} -->
-
+      <button @click="toggleChat" class="chat-toggle" >Chat</button>
+      <Chat class="chat" v-bind:all="all" v-bind:username="username" v-if="chat"/>
         <span id="logo">Round</span><br>
-        <span style="margin:auto; width:2em; background:transparent; border:none; color:white; font-size:40px;text-align:center">{{round}}</span>
+        <span style="margin:auto; width:2em; background:transparent; border:none; color:white; font-size:27px;text-align:center">{{round}}</span>
         <br>
         <br>
 
         <div v-if="turn">
           <div v-if="bet">
-              <span style="font-size:30px; color:green;">Your Turn to Bet</span>
+              <span style="font-size:20px; color:green;">Your Turn to Bet</span>
           </div>
               
           <div v-if="play">
-              <span style="font-size:30px; color:green;"> Your Turn to Play a Card</span>
+              <span style="font-size:20px; color:green;"> Your Turn to Play a Card</span>
           </div>
         </div>
 
         <div v-else>
           <div v-if="bet">
-              <span style="font-size:30px; color:red;">Waiting for {{allName}} to Bet</span>
+              <span style="font-size:20px; color:red;">Waiting for {{allName}} to Bet</span>
           </div>
               
           <div v-if="play">
-              <span style="font-size:30px; color:red;">Waiting for {{allName}} <span v-if="hand.length === cardsPerRound[round] && turnIndex > 0"> to Bet </span> <span v-else> to Play a Card </span> </span>
+              <span style="font-size:20px; color:red;">Waiting for {{allName}} <span v-if="hand.length === cardsPerRound[round] && turnIndex > 0"> to Bet </span> <span v-else> to Play a Card </span> </span>
           </div>
         </div>
 
         <br>
 
-        <span style="font-size:30px; color:white;">Number of tricks won: {{tricksWon}}</span>
+        <span style="font-size:20px; color:white;">Number of tricks won: {{tricksWon}}</span>
 
         <br><br><br>
 
-        <span style="font-size:20px; color:white">Opponents:</span>
+        <span style="font-size:14px; color:white">Opponents:</span>
         <div class="opponents">
           <div v-for="user in opponents" v-bind:key="user.name" style="border:1px solid darkgrey; padding:1%;">
-            <span style="font-size:20px; color:white; margin-bottom:5px">{{user.name}}</span><br>
-            <span v-bind:class="getClass(user)" style="color:white; font-size:15">{{opponentTricks[user.name]}} tricks won. {{tableData[round][user.name+"bet"]}} tricks needed.</span>
+            <span style="font-size:14px; color:white; margin-bottom:5px">{{user.name}}</span><br>
+            <span v-bind:class="getClass(user)" style="color:white; font-size:10">{{opponentTricks[user.name]}} tricks won. {{tableData[round][user.name+"bet"]}} tricks needed.</span>
           </div>
         </div>
         
@@ -77,23 +71,23 @@
         </div>
         
         <div v-else-if="roundDone">
-          <div v-if="winners.length > 0" style="font-size:20px; color:white; margin-bottom:10px">
+          <div v-if="winners.length > 0" style="font-size:14px; color:white; margin-bottom:10px">
             <span v-for="(winner, i) in winners" v-bind:key="i"> {{winner}}, </span> won this round!
           </div>
-          <div v-else style="font-size:15px; margin-bottom:10px; color:red">
+          <div v-else style="font-size:10px; margin-bottom:10px; color:red">
             Nobody won the round... Losers.
           </div>
           <button @click="nextRound()">Deal Cards!</button>
         </div>
 
         <div v-else-if="waitingForDeal">
-          <div v-if="winners.length > 0" style="font-size:20px; color:white; margin-bottom:10px">
+          <div v-if="winners.length > 0" style="font-size:14px; color:white; margin-bottom:10px">
             <span v-for="(winner, i) in winners" v-bind:key="i"> {{winner}}, </span> won this round!
           </div>
-          <div v-else style="font-size:15px; margin-bottom:10px; color:red">
+          <div v-else style="font-size:10px; margin-bottom:10px; color:red">
             Nobody won the round... Losers.
           </div>
-          <span style="font-size:25px; color:white;">Waiting for {{allName}} to Deal the Cards</span>
+          <span style="font-size:17px; color:white;">Waiting for {{allName}} to Deal the Cards</span>
         </div>
 
         <div v-else-if="!waitingForDeal">
@@ -136,31 +130,8 @@
           
         <br><br>
 
-        <table style="width:100%" v-bind:key="updatetablekey">
+        <Table v-bind:cardsPerRound="cardsPerRound" v-bind:tableData="tableData" v-bind:roundResults="roundResults" v-bind:headers="headers"/>
 
-          <thead>
-            <col style="width:auto; height:100%" v-for="(_, i) in this.headers" v-bind:key="i">
-            <tr>
-              <th v-for="(h, index) in this.headers" v-bind:key="index">{{h}}</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            <tr v-for="(d, ind) of this.tableData" v-bind:key="ind">
-              <td>
-                <div style="margin:auto; width:2em; background:transparent; border:none; color:white">{{cardsPerRound[d['round']]}}</div>
-              </td>
-
-              <td v-for="(key, index) of Object.keys(d).slice(1)" v-bind:key="index">
-                <span v-bind:class="{ won: (roundResults[ind][key]===1) , lost: (roundResults[ind][key]===-1) }" style="width:2em; background:transparent; border:none; color:white" type="number" maxlength="3">{{d[key]}}</span>
-              </td>
-
-            </tr>
-
-          </tbody>
-          
-        </table>
     </div>
 </template>
 
@@ -173,16 +144,20 @@ import {socket, eventBus} from "../main";
 import { setTimeout } from 'timers';
 import { copyFile } from 'fs';
 import { async } from 'q';
+import Table from './Table';
+import Chat from './Chat';
 
 
 export default {
   name: 'Game',
   components: {
-
+    Table,
+    Chat
   },
   
   data() {
     return{
+        chat: false,
         trump: null,
         updatetablekey: 0, // this is an irrelavent data entry... dont worry about keeping state
         winners: [],
@@ -372,51 +347,7 @@ export default {
             .then(res => {
               this.deck = res.data[0];
               this.trump = res.data[1];
-              let temp = [];
-              let suits;
-              switch (this.trump.suit){
-                case "D":
-                  suits = ["C", "H", "S", "D"];
-                  for (let suit of suits){
-                    for (let card of this.hand){
-                      if (card.suit === suit) {
-                        temp.push(card);
-                      }
-                    }
-                  }
-                  break;
-                case "H":
-                  suits = ["C", "D", "S", "H"];
-                  for (let suit of suits){
-                    for (let card of this.hand){
-                      if (card.suit === suit) {
-                        temp.push(card);
-                      }
-                    }
-                  }
-                  break;
-                case "C":
-                  suits = ["H", "S", "D", "C"];
-                  for (let suit of suits){
-                    for (let card of this.hand){
-                      if (card.suit === suit) {
-                        temp.push(card);
-                      }
-                    }
-                  }
-                  break;
-                case "S":
-                  suits = ["D", "C", "H", "S"];
-                  for (let suit of suits){
-                    for (let card of this.hand){
-                      if (card.suit === suit) {
-                        temp.push(card);
-                      }
-                    }
-                  }
-                  break;
-              }
-              this.hand = temp;
+              this.sortCards(res.data[1]);
               })
           .catch(err => {console.log("problem getting deck")});
 
@@ -456,6 +387,7 @@ export default {
     
 
   },
+
 
   mounted(){
 
@@ -675,54 +607,8 @@ export default {
         await axios.post(`/api/online/setround/${this.round}`)
           .catch(err => {console.log(err)});
 
-        let temp = [];
-        let suits;
-        console.log(this.hand, this.trump)
-        switch (this.trump.suit){
-          case "D":
-            suits = ["C", "H", "S", "D"];
-            for (let suit of suits){
-              for (let card of this.hand){
-                console.log(suit, card);
-                if (card.suit === suit) {
-                  temp.push(card);
-                }
-              }
-            }
-            break;
-          case "H":
-            suits = ["C", "D", "S", "H"];
-            for (let suit of suits){
-              for (let card of this.hand){
-                if (card.suit === suit) {
-                  temp.push(card);
-                }
-              }
-            }
-            break;
-          case "C":
-            suits = ["H", "S", "D", "C"];
-            for (let suit of suits){
-              for (let card of this.hand){
-                if (card.suit === suit) {
-                  temp.push(card);
-                }
-              }
-            }
-            break;
-          case "S":
-            suits = ["D", "C", "H", "S"];
-            for (let suit of suits){
-              for (let card of this.hand){
-                if (card.suit === suit) {
-                  temp.push(card);
-                }
-              }
-            }
-            break;
-        }
-        console.log(temp);
-        this.hand = temp;
+        await this.sortCards(this.trump);
+
     });
 // =======================================================
 
@@ -751,30 +637,6 @@ export default {
 // =======================================================
 
     nextRound: function(){
-        // this.roundDone = false;
-        // this.tricksWon = 0;
-        // this.round++;
-        // this.bet = true;
-        // this.play = false;
-
-        // axios.get('/api/score/getRoundResults')
-        //   .then(res => {
-        //     this.roundResults = res.data;
-        //     this.updateTable()
-        //   })
-        // // this.updateTable()
-
-        // this.dealHand();
-
-        // axios.get('/api/online/getdeck')
-        //   .then(res => {
-        //     this.deck = res.data[0];
-        //     this.trump = res.data[1];
-        //     })
-        //   .catch(err => {console.log("problem getting deck")});
-
-        // axios.post(`/api/online/setround/${this.round}`)
-        //   .catch(err => {console.log(err)});
 
         socket.emit('round-done', this.username)
         
@@ -929,8 +791,8 @@ export default {
 
 // =======================================================
 
-    getWinners: function(){
-
+    toggleChat: function(){
+      this.chat = !this.chat;
     },
 
 // =======================================================
@@ -995,6 +857,54 @@ export default {
         return require('../assets/cards/acediamonds.png')
       }
       return require('../assets/cards/'+card['rank']+card['suit']+'.png');
+    },
+
+    sortCards: function(trump){
+            let temp = [];
+            let suits;
+            switch (trump.suit){
+              case "D":
+                suits = ["C", "H", "S", "D"];
+                for (let suit of suits){
+                  for (let card of this.hand){
+                    if (card.suit === suit) {
+                      temp.push(card);
+                    }
+                  }
+                }
+                break;
+              case "H":
+                suits = ["C", "D", "S", "H"];
+                for (let suit of suits){
+                  for (let card of this.hand){
+                    if (card.suit === suit) {
+                      temp.push(card);
+                    }
+                  }
+                }
+                break;
+              case "C":
+                suits = ["H", "S", "D", "C"];
+                for (let suit of suits){
+                  for (let card of this.hand){
+                    if (card.suit === suit) {
+                      temp.push(card);
+                    }
+                  }
+                }
+                break;
+              case "S":
+                suits = ["D", "C", "H", "S"];
+                for (let suit of suits){
+                  for (let card of this.hand){
+                    if (card.suit === suit) {
+                      temp.push(card);
+                    }
+                  }
+                }
+                break;
+            }
+            this.hand = temp;
     }
 
   },
@@ -1069,7 +979,7 @@ export default {
   color: #555;
   text-decoration: none;
   text-transform: uppercase;
-  font-size: 50px;
+  font-size: 33px;
   font-weight: 800;
   letter-spacing: -3px;
   line-height: 1;
@@ -1136,10 +1046,36 @@ img {
 }
 
 .opponents{
+  margin-top: 10px;
   display: flex;
   align-content: center;
   justify-content: center;
   
+}
+
+.chat{
+  position: fixed;
+  height: 100%;
+  width: 75%;
+  right:0px;
+  top: 0px;
+  background-color:  hsl(263,45%,8%);
+  opacity: 0.7;
+  z-index: 1;
+  overflow-y: scroll;
+}
+
+.chat-toggle{
+  -webkit-appearance: none;
+  width: 50px;
+  height: 37px;
+  padding: 5px;
+  position:fixed; 
+  top:0px; 
+  right:0px; 
+  z-index:2;
+  background-color: #8e98a5;
+  border-radius: 5px
 }
 
 </style>

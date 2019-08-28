@@ -3,6 +3,7 @@ const router = express.Router();
 const Users = require('../models/Users');
 const CardDeck = require('../models/CardDeck');
 const Trick = require('../models/Trick');
+const Messages = require('../models/Messages');
 
 router.post('/login', function(req, res) {
     req.session.username = req.body.name;
@@ -167,7 +168,20 @@ router.get('/betOrPlay', function(req, res){
     } else if (req.session.play){
         res.status(200).send('play').end();
     }
-})
+});
+
+router.post('/messages', function(req, res){
+    let message = req.body.message;
+    let name = req.body.name;
+    let newMessage = new Messages(name, message);
+    Messages.addMessage(newMessage);
+    res.status(200).send(newMessage).end();
+});
+
+router.get('/messages', function(req, res){
+    let messages = Messages.getMessages();
+    res.status(200).send(messages).end();
+});
 
 /**
  * sets deck to null
