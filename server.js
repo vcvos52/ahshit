@@ -96,6 +96,11 @@ io.on('connection', function (socket) {
     console.log("in socket", data);
     io.emit('message-posted', data);
   });
+    
+  // start listening for next turn
+  socket.on('pat-pat', function (user) {
+    io.emit('pat-pat', user);
+  });
 });
 
 /**

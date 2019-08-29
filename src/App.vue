@@ -229,13 +229,19 @@ export default {
 // =======================================================
 
     socket.on('message-posted', data => {
-      console.log("in App", data);
       if (this.gameOpen){
-        console.log("game was open...", data);
         eventBus.$emit('message-posted', data);
       }
       
     });
+
+  // =======================================================
+
+    socket.on('pat-pat', user => {
+      if (this.gameOpen){
+        eventBus.$emit('pat-pat', user);
+      }
+    })
 
   },
 

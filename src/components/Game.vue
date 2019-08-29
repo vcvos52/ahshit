@@ -103,9 +103,9 @@
               <button  @click="playCard(i)"  v-bind:id="i" name="cards" class="card-inner"><img :src="getImg(card)"></button>
             </div>
           </label>
-
-          <!-- <button v-for="(card, i) in hand" @click="playCard(i)" v-bind:key="i" v-bind:id="i" name="cards">Suit: {{card.suit}} <br> <br> Rank: {{card.rank}}</button> -->
         </div>
+
+        <button @click="patpat">Pat Pat</button>
 
         <div style="color:red" v-if="wrongSuit">
           <br>
@@ -530,9 +530,9 @@ export default {
       if (!this.checkInAll(user)){
         return;
       }
+      await axios.delete('/api/online/trick');
       this.trickDone = false;
       this.currentTrick = [];
-      await axios.delete('/api/online/trick');
     });
 // =======================================================
 
@@ -612,6 +612,16 @@ export default {
     });
 // =======================================================
 
+    eventBus.$on('pat-pat', user => {
+      if (!this.checkInAll(user)){
+        return;
+      }
+      if (this.turn){
+        alert("Pat Pat Mothafucka");
+      }
+    })
+
+// =======================================================
 
   },
 
@@ -842,8 +852,6 @@ export default {
 // =======================================================
 
     nextTrick: function(){
-      this.trickDone = false;
-      this.currentTrick = [];
       socket.emit('trick-done', this.username)
     },
 
@@ -905,6 +913,10 @@ export default {
                 break;
             }
             this.hand = temp;
+    },
+
+    patpat: function(){
+      socket.emit('pat-pat', this.username);
     }
 
   },
@@ -924,6 +936,10 @@ export default {
     eventBus.$off('award-trick');
 
     eventBus.$off('round-done');
+
+    eventBus.$off('we-got-a-winner');
+
+    eventBus.$off('pat-pat')
 
   },
 
