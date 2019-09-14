@@ -1,8 +1,8 @@
 <template>
     
-    <div v-bind:class="{ trick: (trickDone) }">
+    <div id="game-body" v-bind:class="{ trick: (trickDone) }">
       <button @click="toggleChat" class="chat-toggle" >Chat</button>
-      <Chat class="chat" v-bind:all="all" v-bind:username="username" v-if="chat"/>
+      <Chat id="chat-panel" class="chat" v-bind:all="all" v-bind:username="username" v-if="chat"/>
         <span id="logo">Round</span><br>
         <span style="margin:auto; width:2em; background:transparent; border:none; color:white; font-size:27px;text-align:center">{{round}}</span>
         <br>
@@ -228,6 +228,14 @@ export default {
 
     eventBus.$emit('game-started');
 
+    /**
+     * Two options for creating this view:
+     * 1. The page has been refreshed
+     *  -if this is the case, it loads the correct data from the session
+     * 2. First time the page is loaded
+     *  -sets all of the to the initial game state
+     */
+
     if (this.refresh){
 
       console.log("Refresh is TRUE");
@@ -390,6 +398,7 @@ export default {
 
 
   mounted(){
+
 
 // =======================================================
 
@@ -627,6 +636,9 @@ export default {
 
   methods: {
 
+      /**
+       * Helper function to check if a given user is in the player's game
+       */
       checkInAll: function(user){
           for (let i = 0; i < this.all.length; i++){
               let person = this.all[i];
@@ -637,6 +649,9 @@ export default {
           return false;
       },
 
+      /**
+       * Helper function to check if the given user has won the trick
+       */
       getClass: function(user){
         return {
           'won': this.opponentTricks[user.name] == this.tableData[this.round][user.name+'bet'],
@@ -647,13 +662,15 @@ export default {
 // =======================================================
 
     nextRound: function(){
-
         socket.emit('round-done', this.username)
         
     },
 
 // =======================================================
 
+    /**
+     * Called after the trick is completed
+     */
     newDeck: function(){
         axios.get('/api/online/setdeck')
             .then(res => {
@@ -676,6 +693,11 @@ export default {
 
 // =======================================================
 
+    /**
+     * Called when a player plays a card
+     * if not last player to play: adds card and sends info to other players, switches turn
+     * If last player: Calls the award trick function
+     */
     playCard: async function(i){
       this.wrongSuit = false;
       if (this.turn && !(this.bet)){
@@ -713,6 +735,8 @@ export default {
         await socket.emit('card-played', [card, firstCardBoolean, this.username]);
         console.log("504 in card played", this.turnIndex, this.all);
         let trickDoneBoolean = false;
+
+        // Checks if the trick is done
         if (this.turnIndex === this.all.length){
           trickDoneBoolean = true;
           await this.awardTrick(trick, card[0]);
@@ -736,6 +760,10 @@ export default {
 
 // =======================================================
 
+    /**
+     * When the all players have played, this algorithm awards the trick to the correct player
+     * Emits the winner of the trick to all of the players
+     */
     awardTrick: function(trick, newcard){
       let trumpSuit = this.trump['suit'];
       let ledSuit = this.firstPlayedCard['suit'];
@@ -803,10 +831,19 @@ export default {
 
     toggleChat: function(){
       this.chat = !this.chat;
+      if (this.chat){
+
+        // document.body.style.overflow = 'hidden'
+        // document.getElementById('game-body').style.overflow = 'hidden'
+      } else {
+        document.body.style.overflow = 'scroll'
+        // document.getElementById('game-body').style.overflow = 'scroll'
+      }
     },
 
 // =======================================================
 
+    // Updates the results of each round
     submitResults: function(){
       // Here items is the list of winners
 
@@ -822,6 +859,7 @@ export default {
 
 // =======================================================
 
+    // Updates the score card
     // this.tableData = [{ "round": 1, "p0score": 0, "player0bet": 0, "p1score": 0, "player1bet": 0, "p2score": 0, "player2bet": 0, "p3score": 0, "player3bet": 0, "p4score": 0, "player4bet": 0 }
     // this.roundResults = [{'round': 1, 'player0bet': 1 or -1 or 0...}]
     updateTable: function(){
@@ -857,6 +895,9 @@ export default {
 
 // =======================================================
 
+    /**
+     * Gets the corresponding image for the card... including fix for AD (adblockers block it)
+     */
     getImg: function(card){
       if (!card){
         return require('../assets/cards/empty.jpg');
@@ -867,6 +908,9 @@ export default {
       return require('../assets/cards/'+card['rank']+card['suit']+'.png');
     },
 
+    /**
+     * Algorithm to sort the hand of cards by suit
+     */
     sortCards: function(trump){
             let temp = [];
             let suits;

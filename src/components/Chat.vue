@@ -1,5 +1,5 @@
 <template>
-    <div class="chat-window">
+    <div id="fixed" class="chat-window">
         <ul>
             <li v-for="(message, i) in messages" v-bind:key="i" v-bind:class="getMessageClass(message)">
                 <span style="width:100%; overflow-wrap:break-word">{{message.message}}</span><br>
@@ -42,6 +42,11 @@ export default {
     },
 
     mounted(){
+        
+        /**
+            receives the socket communication for a posted message
+            Pushes it to message list so it reactively appears on page
+         */
         eventBus.$on('message-posted', data => {
             console.log("in eventbus on", data);
             if (!this.checkInAll(data.name)){
@@ -50,9 +55,20 @@ export default {
             this.messages.push(data);
             console.log(this.messages);
             });
+
+        document.getElementById('chat-panel').addEventListener('mouseenter', function(){
+          document.body.style.overflow = 'hidden'
+        });
+        document.getElementById('chat-panel').addEventListener('mouseleave', function(){
+          document.body.style.overflow = 'scroll'
+        })
     },
 
     methods: {
+
+        /**
+         * Posts a message and sends the socket comm to other users
+         */
         postMessage: function(message){
             let data = {'name':this.username, 'message':this.message}
             axios.post('/api/online/messages', data)
@@ -64,6 +80,9 @@ export default {
             
         }, 
 
+        /**
+         * Helper to set the color of message to user or other
+         */
         getMessageClass: function(message){
             return {
                 'my-message': message.name === this.username,
@@ -71,6 +90,9 @@ export default {
             }
         },
 
+        /**
+         * Helper function to check if message was sent from someone in game
+         */
         checkInAll: function(user){
             for (let i = 0; i < this.all.length; i++){
                 let person = this.all[i];

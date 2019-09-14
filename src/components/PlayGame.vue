@@ -1,20 +1,20 @@
 <template>
     <div>
-        <!-- {{username}} -->
-        <!-- {{all}} -->
+        <!-- Present the game lobby before someone starts -->
         <div v-if="gameStarted===false">
 
             <div v-if="gameEnded===true">
-                Some Bitch ass left the game...
+                Some one left the game...
             </div>
 
-            In Your Game:
-            <div v-for="user in all" v-bind:key="user.name">
+            <span style="color:white">In Your Game:</span>
+            <div style="color:white" v-for="user in all" v-bind:key="user.name">
                 {{user.name}}
             </div>
-            <button @click="startGame">Start Game</button>
+            <button id="button2" style="margin-top:10px" @click="startGame">Start Game</button>
         </div>
 
+        <!-- Game has been started -->
         <div v-if="gameStarted===true">
             <Game v-bind:initializer="first" v-bind:all="all" v-bind:refresh="refresh" v-bind:username="username"/>
         </div>
@@ -55,12 +55,15 @@ export default {
 
   created: async function(){
 
+      // Send info of player joining the lobby to others
       eventBus.$emit('lobby-started');
 
+      // gets all the people waiting to play
       axios.get('/api/online/all').then(res => {
           this.all = res.data;
       });
 
+      // Method to help with refreshing.. sets game open if session data says so
       axios.get('/isgamestarted').then(data => {
           if (data.data === 'gamestarted'){
             this.refresh = true;
@@ -79,6 +82,7 @@ export default {
 
   mounted(){
 
+    // Listens for someone else joining the lobby
     eventBus.$on('player-joined', user => {
         console.log("PlayGame 70 -- ", this.username, this.all);
         if (!this.gameStarted){
@@ -88,6 +92,7 @@ export default {
         }
       });
 
+    // listens for player leaving the lobby
     eventBus.$on('player-left', user => {
         //   this.all.push(data);
         if (this.gameStarted === false){
@@ -103,6 +108,7 @@ export default {
         }
       });
 
+    // Game has been started, go play.
     eventBus.$on('start-game', d => {
         if (!this.gameStarted){
             this.gameStarted = true;
@@ -116,6 +122,9 @@ export default {
 
   methods: {
 
+      /**
+       * Helper function: checks if socket data comes from user in game
+       */
       checkInAll: function(user){
           for (let i = 0; i < this.all.length; i++){
               let person = this.all[i];
@@ -126,6 +135,9 @@ export default {
           return false;
       },
 
+      /**
+       * Starts the game and sends the communication to all of the other players
+       */
       startGame: function(){
           axios.put('/api/online/removeplayers', this.all)
             .then(res => {
